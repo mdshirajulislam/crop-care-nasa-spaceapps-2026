@@ -38,6 +38,44 @@ By turning raw satellite observations (precipitation, soil moisture, solar irrad
 
 ---
 
+## 📸 Application Preview & Screenshots
+
+<div align="center">
+  <h3>🌾 Hyperlocal Agro Dashboard with NASA Spray Advisory & Weather Shield</h3>
+  <img src="screenshots/dashboard.png" alt="Crop Care Dashboard" width="95%" />
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>🌱 NASA Climatology Planting Calendar & Optimal Sowing Window</h3>
+  <img src="screenshots/planting-calendar-1.png" alt="NASA Climatology Planting Calendar" width="95%" />
+</div>
+
+<br/>
+
+<div align="center">
+  <h3>📊 20-Year Baseline Rain & Thermal Stress Lifecycle Matrix</h3>
+  <img src="screenshots/planting-climate-matrix.png" alt="Crop Lifecycle Climate Matrix" width="95%" />
+</div>
+
+<br/>
+
+<table align="center" width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <h4>🔬 AI Digital Crop Doctor (Pathology & Remedy)</h4>
+      <img src="screenshots/crop-doctor-ai.png" alt="AI Digital Crop Doctor" width="100%" />
+    </td>
+    <td width="50%" align="center">
+      <h4>💰 Farm Diary & Financial ROI Analytics</h4>
+      <img src="screenshots/farm-diary-roi.png" alt="Farm Diary and ROI" width="100%" />
+    </td>
+  </tr>
+</table>
+
+---
+
 ## ⚠️ The Problem & Impact
 
 - **Climate Uncertainty & Extreme Weather**: Bangladeshi agriculture is heavily impacted by erratic monsoons, upstream flash floods in the Haor belt, sudden heatwaves, and droughts.
