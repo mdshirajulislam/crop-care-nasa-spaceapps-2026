@@ -51,44 +51,44 @@ export const LandHealthCard = ({ plotData, onNavigateToMap, onNavigateToAdvisor 
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         {/* Current Crop */}
-        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <span className="text-[11px] text-slate-500 block font-medium">{t.landHealth.currentCrop}</span>
-          <p className="text-sm font-bold text-slate-900 line-clamp-1">
+        <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/90 space-y-1">
+          <span className="text-[11px] text-slate-500 block font-semibold">{t.landHealth.currentCrop}</span>
+          <p className="text-sm font-extrabold text-slate-900 line-clamp-1">
             {lang === 'bn' ? plot.crop_name : (plot.crop_name_en || 'Aman Rice')}
           </p>
-          <span className="text-[11px] text-emerald-700 font-semibold">{plot.crop_variety}</span>
+          <span className="text-[11px] text-emerald-800 font-bold block">{plot.crop_variety}</span>
         </div>
 
         {/* Total Land (Fixed Unit & Format) */}
-        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <span className="text-[11px] text-slate-500 block font-medium">{t.landHealth.totalLand}</span>
-          <p className="text-sm font-bold text-slate-900">{landFormatted.bighaText}</p>
-          <span className="text-[11px] text-slate-500">({landFormatted.decimalText})</span>
+        <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/90 space-y-1">
+          <span className="text-[11px] text-slate-500 block font-semibold">{t.landHealth.totalLand}</span>
+          <p className="text-sm font-extrabold text-slate-900">{landFormatted.bighaText}</p>
+          <span className="text-[11px] text-slate-600 font-medium">({landFormatted.decimalText})</span>
         </div>
 
         {/* Health / NDVI */}
-        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+        <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/90 space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-slate-500 font-medium">{t.landHealth.satelliteHealth}</span>
+            <span className="text-[11px] text-slate-500 font-semibold">{t.landHealth.satelliteHealth}</span>
             <Activity className="w-3.5 h-3.5 text-emerald-600" />
           </div>
-          <p className="text-sm font-bold text-emerald-700">
+          <p className="text-sm font-extrabold text-emerald-800">
             {toBanglaDigits(plot.ndvi_score, lang)} • {t.landHealth.good}
           </p>
           <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-500 to-emerald-500 h-1.5 rounded-full" style={{ width: `${plot.ndvi_score * 100}%` }}></div>
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 h-1.5 rounded-full" style={{ width: `${plot.ndvi_score * 100}%` }}></div>
           </div>
         </div>
 
         {/* Current Stage */}
-        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-          <span className="text-[11px] text-slate-500 block font-medium">{t.landHealth.stage}</span>
-          <p className="text-sm font-bold text-amber-700 line-clamp-1">
+        <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/90 space-y-1">
+          <span className="text-[11px] text-slate-500 block font-semibold">{t.landHealth.stage}</span>
+          <p className="text-sm font-extrabold text-amber-800 line-clamp-1">
             {lang === 'bn' ? plot.current_stage : 'Tillering Stage'}
           </p>
-          <span className="text-[11px] text-slate-500">{t.landHealth.seedlingAge} {toBanglaDigits(78, lang)} {t.landHealth.days}</span>
+          <span className="text-[11px] text-slate-600 font-medium block">{t.landHealth.seedlingAge} {toBanglaDigits(78, lang)} {t.landHealth.days}</span>
         </div>
       </div>
 

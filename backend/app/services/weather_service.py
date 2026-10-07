@@ -26,19 +26,19 @@ BENGALI_DAYS_SHORT = {
 }
 
 WEATHER_CODE_MAP = {
-    0: {"name_bn": "পরিষ্কার আকাশ", "icon": "sunny", "risk": "low"},
-    1: {"name_bn": "প্রধানত পরিষ্কার", "icon": "mostly_sunny", "risk": "low"},
-    2: {"name_bn": "আংশিক মেঘলা", "icon": "partly_cloudy", "risk": "low"},
-    3: {"name_bn": "মেঘলা আকাশ", "icon": "cloudy", "risk": "low"},
-    45: {"name_bn": "কুয়াশাচ্ছন্ন", "icon": "fog", "risk": "moderate"},
-    48: {"name_bn": "ঘন কুয়াশা", "icon": "fog", "risk": "high"},
-    51: {"name_bn": "হালকা গুঁড়ি গুঁড়ি বৃষ্টি", "icon": "drizzle", "risk": "moderate"},
-    53: {"name_bn": "গুঁড়ি গুঁড়ি বৃষ্টি", "icon": "drizzle", "risk": "moderate"},
-    61: {"name_bn": "হালকা বৃষ্টি", "icon": "rain_light", "risk": "moderate"},
-    63: {"name_bn": "মাঝারি বৃষ্টি", "icon": "rain_moderate", "risk": "high"},
-    65: {"name_bn": "ভারী বৃষ্টিপাত", "icon": "rain_heavy", "risk": "critical"},
-    80: {"name_bn": "বিক্ষিপ্ত বৃষ্টিপাত", "icon": "rain_light", "risk": "moderate"},
-    95: {"name_bn": "বজ্রবৃষ্টি / কালবৈশাখী", "icon": "thunderstorm", "risk": "critical"}
+    0: {"name_bn": "পরিষ্কার আকাশ", "name_en": "Clear Sky", "icon": "sunny", "risk": "low"},
+    1: {"name_bn": "প্রধানত পরিষ্কার", "name_en": "Mainly Clear", "icon": "mostly_sunny", "risk": "low"},
+    2: {"name_bn": "আংশিক মেঘলা", "name_en": "Partly Cloudy", "icon": "partly_cloudy", "risk": "low"},
+    3: {"name_bn": "মেঘলা আকাশ", "name_en": "Overcast", "icon": "cloudy", "risk": "low"},
+    45: {"name_bn": "কুয়াশাচ্ছন্ন", "name_en": "Foggy", "icon": "fog", "risk": "moderate"},
+    48: {"name_bn": "ঘন কুয়াশা", "name_en": "Dense Fog", "icon": "fog", "risk": "high"},
+    51: {"name_bn": "হালকা গুঁড়ি গুঁড়ি বৃষ্টি", "name_en": "Light Drizzle", "icon": "drizzle", "risk": "moderate"},
+    53: {"name_bn": "গুঁড়ি গুঁড়ি বৃষ্টি", "name_en": "Moderate Drizzle", "icon": "drizzle", "risk": "moderate"},
+    61: {"name_bn": "হালকা বৃষ্টি", "name_en": "Light Rain", "icon": "rain_light", "risk": "moderate"},
+    63: {"name_bn": "মাঝারি বৃষ্টি", "name_en": "Moderate Rain", "icon": "rain_moderate", "risk": "high"},
+    65: {"name_bn": "ভারী বৃষ্টিপাত", "name_en": "Heavy Rain", "icon": "rain_heavy", "risk": "critical"},
+    80: {"name_bn": "বিক্ষিপ্ত বৃষ্টিপাত", "name_en": "Rain Showers", "icon": "rain_light", "risk": "moderate"},
+    95: {"name_bn": "বজ্রবৃষ্টি / কালবৈশাখী", "name_en": "Thunderstorm", "icon": "thunderstorm", "risk": "critical"}
 }
 
 class WeatherService:
@@ -97,6 +97,7 @@ class WeatherService:
                             "wind_kmh": round(windspeeds[i], 1) if i < len(windspeeds) else 8.0,
                             "weather_code": w_code,
                             "weather_desc_bn": code_info["name_bn"],
+                            "weather_desc_en": code_info.get("name_en", "Clear Sky"),
                             "icon": code_info["icon"],
                             "risk_level": code_info["risk"]
                         }
@@ -125,6 +126,7 @@ class WeatherService:
                         spray_title_bn = "কীটনাশক ও সার প্রয়োগের অনুকূল সময়"
                         spray_detail_bn = "আজ সারাদিন আকাশ অনুকূল থাকবে ও বৃষ্টির ঝুঁকি কম। বিকালের রোদে স্প্রে করা সর্বোত্তম।"
 
+                    cur_code_info = WEATHER_CODE_MAP.get(current.get("weathercode", 0), {})
                     return {
                         "source_label": "Open-Meteo High-Resolution Forecast (7-Day)",
                         "verification_source": "NASA POWER & GPM Climatology Baseline",
@@ -132,7 +134,8 @@ class WeatherService:
                             "temperature": round(current.get("temperature", 28.5), 1),
                             "windspeed": round(current.get("windspeed", 8.2), 1),
                             "weathercode": current.get("weathercode", 0),
-                            "condition_bn": WEATHER_CODE_MAP.get(current.get("weathercode", 0), {}).get("name_bn", "পরিষ্কার আকাশ")
+                            "condition_bn": cur_code_info.get("name_bn", "পরিষ্কার আকাশ"),
+                            "condition_en": cur_code_info.get("name_en", "Clear Sky")
                         },
                         "forecast": forecast_days,
                         "pesticide_spray_advisor": {

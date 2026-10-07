@@ -64,18 +64,18 @@ export const translations = {
       expertHelpBadge: "ভয়েস সহকারী"
     },
     advancedNasa: {
-      title: "নাসা আর্থ সায়েন্স অ্যাডভান্সড ফিচারস (NASA Earth Science Innovations)",
+      title: "নাসার স্যাটেলাইট ভিত্তিক উন্নত কৃষি সেবা",
       badge: "১০০% ফ্রি নাসা ডেটা",
       insuranceBtn: "নাসা ফসল বীমা সনদপত্র",
       smapTitle: "NASA SMAP স্মার্ট সেচ নির্দেশক",
       soilMoisture: "মাটির আর্দ্রতা",
       dieselSavings: "💰 জ্বালানি ও বিদ্যুৎ সাশ্রয়:",
       estimatedSavings: "আনুমানিক ৳ ১,২০০",
-      gpmTitle: "NASA GPM ফ্ল্যাশ ফ্লাড আর্লি অ্যালার্ট",
+      gpmTitle: "NASA GPM আকস্মিক বন্যার আগাম সতর্কতা",
       floodRiskHaor: "হাওর ও নিম্নাঞ্চলের ঝুঁকি",
       floodForecastSafe: "আগামী ৭ দিনে আকস্মিক বন্যার আশঙ্কা নেই। স্বাভাবিক কৃষি কাজ চালিয়ে যেতে পারেন।",
       floodRiskLevel: "ঝুঁকির মাত্রা:",
-      radarTitle: "লাইভ পেস্ট ও ডিজিজ ক্লাইমেট রাডার",
+      radarTitle: "লাইভ পোকা ও রোগবালাই আবহাওয়া রাডার",
       radarHighRisk: "⚠️ উচ্চ প্রাদুর্ভাব সতর্কতা",
       radarLowRisk: "✓ নিয়ন্ত্রিত পরিবেশ",
       remedyBtn: "প্রতিকার দেখুন →"

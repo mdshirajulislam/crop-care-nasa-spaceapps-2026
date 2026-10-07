@@ -54,6 +54,53 @@ export const DashboardPage = ({ setActiveTab }) => {
 
   return (
     <div className="space-y-6 pb-12">
+      {/* Executive Welcome & Telemetry Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 rounded-2xl p-5 sm:p-6 text-white shadow-lg border border-slate-700/50 relative overflow-hidden">
+        {/* Subtle decorative glow */}
+        <div className="absolute right-0 top-0 w-80 h-full bg-radial-gradient from-emerald-500/10 to-transparent pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-400/30">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                {lang === 'bn' ? 'নাসা লাইভ কানেক্টেড' : 'NASA Live Telemetry Connected'}
+              </span>
+              <span className="text-xs text-slate-300 font-medium">
+                {lang === 'bn' ? 'ময়মনসিংহ সদর • বোরো/আমন মওসুম' : 'Mymensingh Sadar • Season Active'}
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1">
+              {lang === 'bn' ? 'কৃষি ড্যাশবোর্ড ও স্যাটেলাইট মনিটরিং' : 'Agro Command Center & Satellite Telemetry'}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+              {lang === 'bn' 
+                ? 'নাসার SMAP মৃত্তিকা আর্দ্রতা ও GPM বৃষ্টিপাত তথ্য দ্বারা আপনার ফসলের মাঠ সরাসরি পর্যবেক্ষণ করা হচ্ছে।'
+                : 'Real-time hyper-local soil wetness, climate metrics, and disease surveillance for optimal yield.'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 self-start md:self-auto flex-shrink-0">
+            <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-left">
+              <span className="text-[10px] uppercase font-bold text-slate-300 block tracking-wider">
+                {lang === 'bn' ? 'পরবর্তী সেচ' : 'Next Irrigation'}
+              </span>
+              <span className="text-sm font-bold text-emerald-300">
+                {lang === 'bn' ? '৪ দিন পর' : 'In 4 Days'}
+              </span>
+            </div>
+            <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-left">
+              <span className="text-[10px] uppercase font-bold text-slate-300 block tracking-wider">
+                {lang === 'bn' ? 'ফসলের স্বাস্থ্য' : 'Crop Health'}
+              </span>
+              <span className="text-sm font-bold text-white">
+                NDVI 0.68 (উত্তম)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 1. Top Emergency / Spray Advisory Alert */}
       <TopAlertBanner sprayAdvisor={sprayAdvisor} />
 

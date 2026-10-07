@@ -32,37 +32,37 @@ export const WeatherCard = ({ weatherData }) => {
   };
 
   return (
-    <div className="glass-card rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+    <div className="glass-card rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-4 bg-white">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div>
           <div className="flex items-center space-x-2">
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">
               {t.weather.title}
             </h3>
-            <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+            <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-semibold">
               {lang === 'bn' ? 'ময়মনসিংহ সদর' : 'Mymensingh Sadar'}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {weatherData?.source_label || "Open-Meteo Forecast"} • {weatherData?.verification_source || "NASA Climatology"}
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            {weatherData?.source_label || "Open-Meteo High-Resolution"} • {weatherData?.verification_source || "NASA POWER Baseline"}
           </p>
         </div>
 
         {/* Current Snapshot */}
-        <div className="flex items-center space-x-4 self-start sm:self-auto bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200">
-          <div className="flex items-center space-x-1.5">
-            <Sun className="w-5 h-5 text-amber-500" />
-            <span className="text-lg font-extrabold text-slate-900">
+        <div className="flex items-center space-x-4 self-start sm:self-auto bg-slate-100/90 px-4 py-2.5 rounded-2xl border-2 border-slate-300 shadow-xs">
+          <div className="flex items-center space-x-2">
+            <Sun className="w-6 h-6 text-amber-500 flex-shrink-0" />
+            <span className="text-2xl font-black text-slate-900 tracking-tight">
               {toBanglaDigits(current.temperature || 29, lang)}°C
             </span>
           </div>
-          <div className="text-xs text-slate-600 border-l border-slate-200 pl-3">
-            <p className="font-semibold text-emerald-700">
+          <div className="text-xs text-slate-800 border-l-2 border-slate-300 pl-3.5">
+            <p className="font-extrabold text-emerald-900 text-sm">
               {lang === 'bn' ? (current.condition_bn || "পরিষ্কার আকাশ") : (current.condition_en || "Clear Sky")}
             </p>
-            <p className="text-[11px] text-slate-500 flex items-center gap-1">
-              <Wind className="w-3 h-3 text-emerald-600" />
+            <p className="text-xs text-slate-600 font-bold flex items-center gap-1 mt-0.5">
+              <Wind className="w-3.5 h-3.5 text-emerald-700" />
               {toBanglaDigits(current.windspeed || 8, lang)} {t.weather.unitSpeed}
             </p>
           </div>
@@ -111,43 +111,59 @@ export const WeatherCard = ({ weatherData }) => {
             ? (day.weather_desc_bn || "পরিষ্কার আকাশ")
             : (day.weather_desc_en || "Clear Sky");
 
-          return (
+              return (
             <div
               key={idx}
               translate="no"
-              className={`notranslate flex flex-col items-center justify-between p-3 rounded-xl border transition-all ${
+              className={`notranslate flex flex-col items-center justify-between p-3.5 rounded-2xl border-2 transition-all ${
                 isToday
-                  ? 'bg-emerald-50/80 border-emerald-300 shadow-sm ring-1 ring-emerald-400/30'
-                  : 'bg-slate-50 hover:bg-slate-100/80 border-slate-200'
+                  ? 'bg-emerald-50/90 border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
+                  : 'bg-slate-50/70 hover:bg-white border-slate-300 hover:border-emerald-400 shadow-xs'
               }`}
             >
-              {/* Day Name */}
-              <span className={`text-xs font-bold notranslate ${isToday ? 'text-emerald-800' : 'text-slate-800'}`}>
-                {dayLabel}
-              </span>
-              <span className="text-[10px] text-slate-500 mb-1.5 notranslate">
-                {dateLabel}
-              </span>
+              {/* Day & Date Header with clean tag */}
+              <div className="flex flex-col items-center w-full border-b border-slate-200/80 pb-2 mb-1.5">
+                <span className={`text-sm font-extrabold tracking-tight notranslate ${isToday ? 'text-emerald-950 font-black' : 'text-slate-900'}`}>
+                  {dayLabel}
+                </span>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-md mt-0.5 notranslate ${
+                  isToday ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {dateLabel}
+                </span>
+              </div>
 
-              {/* Icon */}
-              <div className="my-1.5 p-1.5 rounded-full bg-white border border-slate-200 shadow-xs">
-                {getWeatherIcon(day.icon, "w-6 h-6")}
+              {/* Weather Icon in rounded highlight circle */}
+              <div className={`my-2 p-2 rounded-2xl border flex items-center justify-center shadow-xs ${
+                isToday ? 'bg-white border-emerald-300' : 'bg-white border-slate-200'
+              }`}>
+                {getWeatherIcon(day.icon, "w-7 h-7")}
               </div>
 
               {/* Weather Condition */}
-              <span className="text-[11px] font-medium text-slate-700 text-center line-clamp-1">
+              <span className={`text-xs font-bold text-center line-clamp-1 mb-2 px-1 ${
+                isToday ? 'text-emerald-900' : 'text-slate-800'
+              }`}>
                 {weatherDesc}
               </span>
 
-              {/* Temps */}
-              <div className="flex items-center space-x-1.5 mt-2 text-xs">
-                <span className="font-bold text-slate-900">{toBanglaDigits(day.temp_max, lang)}°</span>
-                <span className="text-slate-500 text-[11px]">{toBanglaDigits(day.temp_min, lang)}°</span>
+              {/* Temperature Badge (Max & Min) */}
+              <div className="w-full flex items-center justify-center gap-1.5 py-1 px-2 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                <span className="text-sm font-black text-slate-900">
+                  {toBanglaDigits(day.temp_max, lang)}°
+                </span>
+                <span className="text-xs font-bold text-slate-500">
+                  / {toBanglaDigits(day.temp_min, lang)}°
+                </span>
               </div>
 
-              {/* Rain mm */}
-              <div className="flex items-center space-x-1 mt-1.5 text-[11px] text-sky-700 font-medium">
-                <Droplets className="w-3 h-3 text-sky-600" />
+              {/* Rain Badge */}
+              <div className={`w-full mt-2 py-1 px-1.5 rounded-xl flex items-center justify-center gap-1 text-[11px] font-extrabold border ${
+                day.precip_mm > 0 
+                  ? 'bg-sky-50 text-sky-800 border-sky-300' 
+                  : 'bg-slate-100 text-slate-500 border-slate-200'
+              }`}>
+                <Droplets className={`w-3.5 h-3.5 ${day.precip_mm > 0 ? 'text-sky-600' : 'text-slate-400'}`} />
                 <span>{toBanglaDigits(day.precip_mm, lang)} {t.weather.unitMm}</span>
               </div>
             </div>

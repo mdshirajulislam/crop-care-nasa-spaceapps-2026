@@ -56,10 +56,10 @@ export const TopAlertBanner = ({ sprayAdvisor, weatherRisk }) => {
               </span>
             </div>
 
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-wide">
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
               {title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed max-w-3xl">
+            <p className="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed max-w-3xl">
               {detail}
             </p>
           </div>

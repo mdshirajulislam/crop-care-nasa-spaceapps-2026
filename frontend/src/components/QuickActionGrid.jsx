@@ -53,29 +53,29 @@ export const QuickActionGrid = ({ onNavigate }) => {
         <span className="text-xs text-slate-500 font-medium">{t.quickActions.sectionSubtitle}</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {actions.map((act) => {
           const Icon = act.icon;
           return (
             <button
               key={act.id}
               onClick={() => onNavigate(act.id)}
-              className="glass-card-hover group relative overflow-hidden rounded-2xl p-4 text-left border border-slate-200 bg-white flex flex-col justify-between h-36"
+              className="glass-card-hover group relative overflow-hidden rounded-2xl p-4 text-left border border-slate-200/90 bg-white flex flex-col justify-between h-40 transition-all hover:-translate-y-1 hover:shadow-md"
             >
               <div className="flex items-center justify-between w-full">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${act.color} text-white shadow-md ${act.shadowColor} group-hover:scale-110 transition-transform`}>
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${act.color} text-white shadow-md ${act.shadowColor} group-hover:scale-105 transition-transform`}>
                   <Icon className="w-6 h-6" />
                 </div>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200">
                   {act.badge}
                 </span>
               </div>
 
               <div>
-                <h4 className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                <h4 className="text-base font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors">
                   {act.title}
                 </h4>
-                <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
+                <p className="text-xs text-slate-600 font-medium line-clamp-2 mt-1 leading-snug">
                   {act.subtitle}
                 </p>
               </div>
