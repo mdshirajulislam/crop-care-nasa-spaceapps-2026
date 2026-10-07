@@ -1,0 +1,17 @@
+{
+  "short_name": "CropCare",
+  "name": "Crop Care - কৃষি বন্ধু",
+  "icons": [
+    {
+      "src": "/leaf.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#052e16",
+  "theme_color": "#166534",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "bn"
+}

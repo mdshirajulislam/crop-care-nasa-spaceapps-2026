@@ -1,0 +1,197 @@
+{
+  "aman_rice": {
+    "id": "aman_rice",
+    "name_bn": "রোপা আমন ধান",
+    "name_en": "Transplanted Aman Rice",
+    "growth_duration_days": 130,
+    "duration_range": [110, 140],
+    "ideal_sowing_window": {
+      "start_day": 15,
+      "start_month": 7,
+      "end_day": 30,
+      "end_month": 7,
+      "description_bn": "১৫ জুলাই থেকে ৩০ জুলাই (শ্রাবণ মাসের প্রথম পক্ষ)",
+      "rationale_bn": "নাসার ২০ বছরের বৃষ্টিপাতের পরিসংখ্যান (POWER Climatology) অনুযায়ী জুলাইয়ের মাঝামাঝি সময়ে মৌসুমী বৃষ্টিপাত নিয়মিত থাকে। এই সময়ে চারা রোপণ করলে সেপ্টেম্বর-অক্টোবরের ফুল ফোটার সময় অতিবৃষ্টি ও আকস্মিক বন্যার ঝুঁকি এড়ানো যায় এবং নভেম্বরের শুকনো আবহাওয়ায় ফসল কর্তন সহজ হয়।"
+    },
+    "sensitive_stages": [
+      {
+        "stage_name_bn": "চারা রোপণ ও শিকড় স্থাপন (Transplanting & Rooting)",
+        "days_after_sowing": "০-১৫ দিন",
+        "water_requirement": "২-৩ সেমি নিয়ন্ত্রিত পানি",
+        "risk_factors": "ভারী প্লাবন বা পানির অভাব"
+      },
+      {
+        "stage_name_bn": "কুশি গজানো (Tillering Stage)",
+        "days_after_sowing": "২০-৪০ দিন",
+        "water_requirement": "পরিমিত ভেজা অবস্থা",
+        "risk_factors": "ব্লাস্ট ও মাজরা পোকার আক্রমণ"
+      },
+      {
+        "stage_name_bn": "ফুল ফোটা ও থোর আসা (Booting & Flowering)",
+        "days_after_sowing": "৭০-৯০ দিন",
+        "water_requirement": "পর্যাপ্ত আর্দ্রতা জরুরি",
+        "risk_factors": "অতিরিক্ত তাপ (>৩৫°C) অথবা একটানা ভারী বৃষ্টি পরাগায়নে ব্যাঘাত ঘটায়"
+      },
+      {
+        "stage_name_bn": "দানা শক্ত হওয়া ও পাকা (Grain Filling & Ripening)",
+        "days_after_sowing": "১০০-১৩০ দিন",
+        "water_requirement": "পানি নিষ্কাশন",
+        "risk_factors": "হঠাৎ শিলাবৃষ্টি বা ঘূর্ণিঝড়"
+      }
+    ],
+    "fertilizer_schedule_per_bigha": [
+      { "day": 0, "fertilizer": "টিএসপি ১৩ কেজি, এমওপি ৭ কেজি, জিপসাম ৮ কেজি, জিংক ১ কেজি (জমি তৈরির শেষ চাষে)" },
+      { "day": 15, "fertilizer": "ইউরিয়া ৯ কেজি (প্রথম কিস্তি - চারা লাগানোর ১৫ দিন পর)" },
+      { "day": 35, "fertilizer": "ইউরিয়া ৯ কেজি (দ্বিতীয় কিস্তি - কুশি আসার সময়)" },
+      { "day": 55, "fertilizer": "ইউরিয়া ৮ কেজি ও এমওপি ৫ কেজি (তৃতীয় কিস্তি - থোর আসার ৫-৭ দিন পূর্বে)" }
+    ]
+  },
+  "boro_rice": {
+    "id": "boro_rice",
+    "name_bn": "বোরো ধান",
+    "name_en": "Boro Rice",
+    "growth_duration_days": 150,
+    "duration_range": [140, 160],
+    "ideal_sowing_window": {
+      "start_day": 15,
+      "start_month": 12,
+      "end_day": 15,
+      "end_month": 1,
+      "description_bn": "১৫ ডিসেম্বর থেকে ১৫ জানুয়ারি (পৌষ মাস)",
+      "rationale_bn": "শীতের তীব্র শৈত্যপ্রবাহের সময় চারা যেন কোল্ড ইনজুরিতে না পড়ে। নাসার সোলার রেডিয়েশন ও তাপমাত্রা অনুযায়ী জানুয়ারির মাঝামাঝি সময়ে চারা রোপণে মার্চ-এপ্রিলের চৈত্র মাসের কালবৈশাখী ও আগাম বন্যার আগেই এপ্রিলের শেষে ঘরে তোলা যায়।"
+    },
+    "sensitive_stages": [
+      {
+        "stage_name_bn": "শৈত্য সংবেদনশীল পর্যায়",
+        "days_after_sowing": "০-২০ দিন",
+        "water_requirement": "রাতে হালকা পানি জমিয়ে রাখা",
+        "risk_factors": "তাপমাত্রা <১২°C হলে চারা হলুদ হওয়া"
+      },
+      {
+        "stage_name_bn": "পুষ্পায়ন ও দানা গঠন",
+        "days_after_sowing": "৮০-১১০ দিন",
+        "water_requirement": "নিয়মিত সেচ",
+        "risk_factors": "হিট শক বা লু-হাওয়া"
+      }
+    ]
+  },
+  "potato": {
+    "id": "potato",
+    "name_bn": "আলু",
+    "name_en": "Potato (Diamond/Cardinal)",
+    "growth_duration_days": 90,
+    "duration_range": [85, 100],
+    "ideal_sowing_window": {
+      "start_day": 1,
+      "start_month": 11,
+      "end_day": 20,
+      "end_month": 11,
+      "description_bn": "১ নভেম্বর থেকে ২০ নভেম্বর (কার্তিক মাসের শেষ ভাগ)",
+      "rationale_bn": "নাসার ২০ বছরের গড় তাপমাত্রা অনুযায়ী নভেম্বরের প্রথমভাগে রাতের তাপমাত্রা ২০°C-এর নিচে নামতে শুরু করে, যা কন্দ (Tuberization) গঠনের জন্য সবচেয়ে উপযুক্ত। দেরিতে রোপণ করলে ফেব্রুয়ারির শেষের তাপ ও আর্দ্রতায় লেট ব্লাইট (মড়ক) রোগের প্রকোপ বাড়ে।"
+    },
+    "sensitive_stages": [
+      {
+        "stage_name_bn": "কন্দ রোপণ ও অঙ্কুরোদগম (Sprouting)",
+        "days_after_sowing": "০-১৫ দিন",
+        "water_requirement": "মাটিতে স্বাভাবিক 'জো' অবস্থা",
+        "risk_factors": "ভারী বৃষ্টি বা মাটি অতিরিক্ত ভেজা থাকলে বীজ পচন"
+      },
+      {
+        "stage_name_bn": "কন্দ গঠন ও বৃদ্ধি (Tuber Initiation & Bulking)",
+        "days_after_sowing": "৩০-৬০ দিন",
+        "water_requirement": "নিয়মিত পরিমিত সেচ (৭-১০ দিন অন্তর)",
+        "risk_factors": "তাপমাত্রা ২০°C এর বেশি হলে কন্দ বৃদ্ধি বন্ধ হওয়া"
+      },
+      {
+        "stage_name_bn": "ফসল পরিপক্বতা ও কর্তন (Harvesting)",
+        "days_after_sowing": "৭৫-৯০ দিন",
+        "water_requirement": "উত্তোলনের ১০ দিন পূর্বে সেচ বন্ধ",
+        "risk_factors": "লেট ব্লাইট ও কুয়াশাচ্ছন্ন আর্দ্র আবহাওয়া"
+      }
+    ],
+    "fertilizer_schedule_per_bigha": [
+      { "day": 0, "fertilizer": "গোবর সার ১০০০ কেজি, টিএসপি ৩৫ কেজি, জিপসাম ১৫ কেজি ও জিংক ১.৫ কেজি (জমি তৈরির শেষ চাষে)" },
+      { "day": 0, "fertilizer": "ইউরিয়া ১৮ কেজি ও এমওপি ২০ কেজি (বপনের সময় অর্ধেক)" },
+      { "day": 30, "fertilizer": "ইউরিয়া ১৮ কেজি ও এমওপি ২০ কেজি (গাছের গোড়ায় মাটি তুলে দেওয়ার সময়)" }
+    ]
+  },
+  "mustard": {
+    "id": "mustard",
+    "name_bn": "সরিষা (বারি সরিষা-১৪/১৭)",
+    "name_en": "Mustard",
+    "growth_duration_days": 85,
+    "duration_range": [75, 90],
+    "ideal_sowing_window": {
+      "start_day": 20,
+      "start_month": 10,
+      "end_day": 10,
+      "end_month": 11,
+      "description_bn": "২০ অক্টোবর থেকে ১০ নভেম্বর",
+      "rationale_bn": "আমন ধান কাটার পর পরই সরিষা বুনলে বোরো ধান লাগানোর পূর্বে সহজে জমি খালি হয়। আর্লি বীজ বপনে জাবপোকা (Aphid) আক্রমণ থেকে রক্ষা পাওয়া যায়।"
+    },
+    "sensitive_stages": [
+      {
+        "stage_name_bn": "অঙ্কুরোদগম ও চারা পর্যায়",
+        "days_after_sowing": "০-১৫ দিন",
+        "water_requirement": "মাটির আর্দ্রতা সংরক্ষণ",
+        "risk_factors": "অতিরিক্ত খরা বা আর্লি বৃষ্টিতে জমাট বাঁধা"
+      },
+      {
+        "stage_name_bn": "ফুল ফোটা ও পড গঠন (Flowering & Siliqua)",
+        "days_after_sowing": "৩০-৫০ দিন",
+        "water_requirement": "১টি হালকা সেচ",
+        "risk_factors": "মেঘলা কুয়াশাচ্ছন্ন আবহাওয়ায় জাবপোকা ও অলটারনারিয়া ব্লাইট"
+      },
+      {
+        "stage_name_bn": "দানা পাকা ও ফসল কর্তন",
+        "days_after_sowing": "৭০-৮৫ দিন",
+        "water_requirement": "শুষ্ক রৌদ্রোজ্জ্বল আবহাওয়া",
+        "risk_factors": "ঝড় বা অসময়ের শিলাবৃষ্টি"
+      }
+    ],
+    "fertilizer_schedule_per_bigha": [
+      { "day": 0, "fertilizer": "ইউরিয়া ১০ কেজি, টিএসপি ২৪ কেজি, এমওপি ১১ কেজি, জিপসাম ২০ কেজি ও বোরন ১ কেজি (শেষ চাষে)" },
+      { "day": 25, "fertilizer": "ইউরিয়া ১০ কেজি (ফুল আসার পূর্বে প্রথম সেচের পর উপরিপ্রয়োগ)" }
+    ]
+  },
+  "maize": {
+    "id": "maize",
+    "name_bn": "ভুট্টা (রবি/হাইব্রিড)",
+    "name_en": "Maize (Hybrid)",
+    "growth_duration_days": 130,
+    "duration_range": [115, 140],
+    "ideal_sowing_window": {
+      "start_day": 1,
+      "start_month": 11,
+      "end_day": 30,
+      "end_month": 11,
+      "description_bn": "১ নভেম্বর থেকে ৩০ নভেম্বর",
+      "rationale_bn": "নাসার সোলার রেডিয়েশন ডেটা অনুসারে রবি মৌসুমের উজ্জ্বল রোদ ও শুষ্ক জলবায়ু ভুট্টার মোচা গঠনের জন্য সবচেয়ে উপযোগী।"
+    },
+    "sensitive_stages": [
+      {
+        "stage_name_bn": "চারা গজানো ও প্রাথমিক বৃদ্ধি",
+        "days_after_sowing": "০-২৫ দিন",
+        "water_requirement": "পরিমিত আর্দ্রতা",
+        "risk_factors": "ফল আর্মিওয়ার্ম ও শিকড় পচা"
+      },
+      {
+        "stage_name_bn": "পুরুষ ফুল (Tasseling) ও সিল্ক বের হওয়া",
+        "days_after_sowing": "৬০-৮০ দিন",
+        "water_requirement": "নিয়মিত পর্যাপ্ত সেচ",
+        "risk_factors": "তীব্র খরা বা শুষ্কতায় পরাগায়নে বিঘ্ন"
+      },
+      {
+        "stage_name_bn": "মোচায় দানা পরিপুষ্ট হওয়া ও পাকা",
+        "days_after_sowing": "১০০-১৩০ দিন",
+        "water_requirement": "হালকা সেচ ও পরিপক্বতায় শুকানো",
+        "risk_factors": "কালবৈশাখী ঝড় ও জলবদ্ধতা"
+      }
+    ],
+    "fertilizer_schedule_per_bigha": [
+      { "day": 0, "fertilizer": "টিএসপি ৩৪ কেজি, এমওপি ১৫ কেজি, জিপসাম ২০ কেজি, জিংক ১.৫ কেজি ও বোরন ১ কেজি (শেষ চাষে)" },
+      { "day": 25, "fertilizer": "ইউরিয়া ১২ কেজি ও এমওপি ৫ কেজি (গাছের হাঁটু সমান উচ্চতায়)" },
+      { "day": 50, "fertilizer": "ইউরিয়া ১২ কেজি (পুরুষ ফুল বের হওয়ার পূর্বে)" }
+    ]
+  }
+}
