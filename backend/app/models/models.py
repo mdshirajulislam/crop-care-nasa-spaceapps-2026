@@ -10,6 +10,9 @@ class User(Base):
     name = Column(String(100), default="মোঃ সিরাজুল ইসলাম")
     phone = Column(String(20), unique=True, index=True, default="01712345678")
     village = Column(String(100), default="চর নিলক্ষীয়া")
+    area_type = Column(String(50), default="union") # union (গ্রাম/ইউনিয়ন), pourashava (পৌরসভা), city_corporation (সিটি কর্পোরেশন)
+    union_name = Column(String(100), default="চর নিলক্ষীয়া ইউনিয়ন")
+    ward = Column(String(50), default="ওয়ার্ড ১")
     upazila = Column(String(100), default="ময়মনসিংহ সদর")
     district = Column(String(100), default="ময়মনসিংহ")
     language = Column(String(10), default="bn") # bn or en

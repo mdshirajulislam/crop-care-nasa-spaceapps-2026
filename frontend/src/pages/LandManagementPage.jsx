@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchPlots, addPlot, updatePlot, deletePlot } from '../utils/api';
+import { fetchPlots, addPlot, updatePlot, deletePlot, fetchProfile } from '../utils/api';
 import { 
   MapPin, Plus, Trash2, Edit3, Check, Sprout, ArrowRightLeft, 
   Droplet, Shield, X, Loader2, Satellite, Compass, Sparkles, Layers
@@ -11,6 +11,7 @@ import { FarmPlotSatelliteMap } from '../components/FarmPlotSatelliteMap';
 export const LandManagementPage = () => {
   const { lang, t } = useLanguage();
   const [plotData, setPlotData] = useState(null);
+  const [farmerProfile, setFarmerProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlotOnMap, setSelectedPlotOnMap] = useState(null);
 
@@ -56,12 +57,21 @@ export const LandManagementPage = () => {
   };
 
   useEffect(() => {
+    fetchProfile().then(p => {
+      setFarmerProfile(p);
+      if (p?.lat && p?.lon) {
+        setModalBoundary({
+          center: [p.lat, p.lon],
+          points: []
+        });
+      }
+    }).catch(console.error);
     loadPlots();
   }, []);
 
   const handleOpenAdd = () => {
     setEditingPlot(null);
-    const newCenter = [24.7471, 90.4203];
+    const newCenter = [farmerProfile?.lat || 24.7471, farmerProfile?.lon || 90.4203];
     setFormData({
       name: `প্লট ${(plotData?.plots?.length || 0) + 1} - নতুন মাঠ`,
       crop_name: 'আমন ধান',
@@ -226,7 +236,7 @@ export const LandManagementPage = () => {
           existingPlots={plotData?.plots || []}
           activePlot={selectedPlotOnMap}
           onPlotSelect={(plot) => setSelectedPlotOnMap(plot)}
-          initialCenter={[24.7471, 90.4203]}
+          initialCenter={[farmerProfile?.lat || 24.7471, farmerProfile?.lon || 90.4203]}
         />
       </div>
 
@@ -266,7 +276,10 @@ export const LandManagementPage = () => {
                       </h3>
                       <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                         <MapPin className="w-3 h-3 text-emerald-600" />
-                        <span>{lang === 'bn' ? 'ময়মনসিংহ সদর' : 'Mymensingh Sadar'} • NASA GRID: 24.74°N, 90.42°E</span>
+                        <span>
+                          {farmerProfile?.upazila ? `${farmerProfile.upazila}, ${farmerProfile.district}` : (lang === 'bn' ? 'ময়মনসিংহ সদর' : 'Mymensingh Sadar')} 
+                          {' • NASA GRID: '}{(farmerProfile?.lat || 24.74).toFixed(2)}°N, {(farmerProfile?.lon || 90.42).toFixed(2)}°E
+                        </span>
                       </p>
                     </div>
                   </div>

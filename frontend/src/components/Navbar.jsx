@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sprout, CloudSun, Stethoscope, BookOpen, Map, MessageSquare, Settings, Menu, X, Globe, User, Layers } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { fetchProfile } from '../utils/api';
 
 export const Navbar = ({ activeTab, setActiveTab }) => {
   const { lang, toggleLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    fetchProfile()
+      .then((data) => {
+        if (data) setProfile(data);
+      })
+      .catch(() => null);
+  }, [activeTab]);
 
   const navItems = [
     { id: 'dashboard', label: t.nav.dashboard, icon: Sprout },
@@ -15,8 +25,15 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     { id: 'satellite', label: t.nav.satellite, icon: Map },
     { id: 'medicine', label: t.nav.medicine, icon: Layers },
     { id: 'chat', label: t.nav.chat, icon: MessageSquare },
-    { id: 'settings', label: t.nav.settings, icon: Settings },
+    { id: 'settings', label: t.nav.settings, icon: User },
   ];
+
+  const isProfileActive = activeTab === 'settings' || activeTab === 'profile';
+  const userInitial = profile?.name ? profile.name.trim().charAt(0) : (lang === 'bn' ? 'সি' : 'S');
+  const userDistrict = profile?.district || (lang === 'bn' ? 'ময়মনসিংহ' : 'Mymensingh');
+  const userShortName = profile?.name 
+    ? profile.name.replace('মোঃ ', '').split(' ')[0] 
+    : (lang === 'bn' ? 'সিরাজুল' : 'Sirajul');
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm">
@@ -44,7 +61,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
           <nav className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const isActive = (item.id === 'settings' && isProfileActive) || activeTab === item.id;
               return (
                 <button
                   key={item.id}
@@ -67,27 +84,41 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
             {/* Language Toggle */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-sm transition-all"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold shadow-sm transition-all cursor-pointer"
               title="Change Language / ভাষা পরিবর্তন"
             >
               <Globe className="w-3.5 h-3.5 text-emerald-600" />
               <span>{lang === 'bn' ? 'English' : 'বাংলা'}</span>
             </button>
 
-            {/* Profile Avatar Badge */}
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
-              <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold shadow-xs">
-                {lang === 'bn' ? 'সি' : 'S'}
+            {/* Profile Avatar Badge - Clickable Button */}
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                isProfileActive
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/30 ring-2 ring-emerald-500/20'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300 shadow-xs'
+              }`}
+              title={lang === 'bn' ? 'কৃষক প্রোফাইল ও সেটিংস খুলুন' : 'Open Farmer Profile & Settings'}
+              id="profile-nav-btn"
+            >
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-xs ${
+                isProfileActive ? 'bg-white text-emerald-700' : 'bg-emerald-600 text-white'
+              }`}>
+                {userInitial}
               </div>
-              <span className="text-xs text-slate-700 font-semibold">
-                {lang === 'bn' ? 'সিরাজুল (ময়মনসিংহ)' : 'Sirajul (Mymensingh)'}
+              <span className="text-xs font-semibold hidden sm:inline">
+                {userShortName} ({userDistrict})
               </span>
-            </div>
+              <span className="text-xs font-semibold sm:hidden">
+                {lang === 'bn' ? 'প্রোফাইল' : 'Profile'}
+              </span>
+            </button>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200"
+              className="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 cursor-pointer"
               aria-label="Open Menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -98,10 +129,42 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-4 space-y-1 shadow-xl">
+        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-4 space-y-1 shadow-xl animate-fadeIn">
+          {/* Mobile Profile Header Button */}
+          <button
+            onClick={() => {
+              setActiveTab('settings');
+              setMobileMenuOpen(false);
+            }}
+            className={`w-full flex items-center space-x-3 p-3 rounded-2xl border transition-all mb-2 text-left cursor-pointer ${
+              isProfileActive
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'bg-emerald-50/90 hover:bg-emerald-100 border-emerald-200 text-slate-800'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-xs ${
+              isProfileActive ? 'bg-white text-emerald-700' : 'bg-emerald-600 text-white'
+            }`}>
+              {userInitial}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className={`text-sm font-bold truncate ${
+                isProfileActive ? 'text-white' : 'text-slate-900'
+              }`}>
+                {profile?.name || (lang === 'bn' ? 'মোঃ সিরাজুল ইসলাম' : 'Md. Sirajul Islam')}
+              </div>
+              <div className={`text-xs ${
+                isProfileActive ? 'text-emerald-100' : 'text-emerald-700 font-medium'
+              }`}>
+                {profile?.upazila ? `${profile.upazila}, ` : ''}{userDistrict} • {lang === 'bn' ? 'প্রোফাইল ও সেটিংস খুলুন' : 'Open Profile & Settings'}
+              </div>
+            </div>
+            <User className={`w-5 h-5 ${isProfileActive ? 'text-white' : 'text-emerald-600'}`} />
+          </button>
+
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = (item.id === 'settings' && isProfileActive) || activeTab === item.id;
             return (
               <button
                 key={item.id}

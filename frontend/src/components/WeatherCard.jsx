@@ -3,11 +3,19 @@ import { Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, Wind, Droplets, In
 import { toBanglaDigits } from '../utils/banglaNumbers';
 import { useLanguage } from '../contexts/LanguageContext';
 
-export const WeatherCard = ({ weatherData }) => {
+export const WeatherCard = ({ weatherData, farmerProfile }) => {
   const { lang, t } = useLanguage();
 
   const forecast = weatherData?.forecast || [];
   const current = weatherData?.current || {};
+
+  const locationBadge = farmerProfile?.upazila
+    ? `${farmerProfile.upazila}, ${farmerProfile.district}${farmerProfile.ward ? ` (${farmerProfile.ward})` : ''}`
+    : (lang === 'bn' ? 'ময়মনসিংহ সদর' : 'Mymensingh Sadar');
+
+  const locationCoords = farmerProfile?.lat && farmerProfile?.lon
+    ? `${farmerProfile.lat.toFixed(4)}° N, ${farmerProfile.lon.toFixed(4)}° E`
+    : null;
 
   const getWeatherIcon = (iconName, className = "w-6 h-6") => {
     switch (iconName) {
@@ -41,11 +49,12 @@ export const WeatherCard = ({ weatherData }) => {
               {t.weather.title}
             </h3>
             <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-semibold">
-              {lang === 'bn' ? 'ময়মনসিংহ সদর' : 'Mymensingh Sadar'}
+              {locationBadge}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            {weatherData?.source_label || "Open-Meteo High-Resolution"} • {weatherData?.verification_source || "NASA POWER Baseline"}
+            {locationCoords ? `${lang === 'bn' ? 'সরাসরি জিপিএস গ্রিড: ' : 'Live GPS Grid: '}${locationCoords} • ` : ''}
+            {weatherData?.source_label || (lang === 'bn' ? "নাসা আর্থ সায়েন্স ও স্যাটেলাইট টেলিমিতি" : "NASA Earth Science & Satellite Telemetry")}
           </p>
         </div>
 

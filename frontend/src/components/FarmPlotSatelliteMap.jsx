@@ -120,10 +120,14 @@ function FarmPlotMapHandler({
 function MapCenterFlyer({ center }) {
   const map = useMap();
   useEffect(() => {
-    if (center && center[0] && center[1]) {
-      map.flyTo(center, 15, { duration: 0.8 });
+    if (map && center && center[0] && center[1]) {
+      const timer = setTimeout(() => {
+        map.invalidateSize();
+        map.flyTo(center, 15, { duration: 0.8 });
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [center]);
+  }, [center?.[0], center?.[1], map]);
   return null;
 }
 
@@ -182,7 +186,7 @@ export const FarmPlotSatelliteMap = ({
     if (initialCenter && initialCenter[0] && initialCenter[1]) {
       setCenterPin(initialCenter);
     }
-  }, [initialCenter]);
+  }, [initialCenter?.[0], initialCenter?.[1]]);
 
   // Recalculate area whenever polygon points change
   useEffect(() => {

@@ -15,10 +15,12 @@ class InsuranceRequest(BaseModel):
 @router.get("/irrigation-advisor")
 async def get_irrigation_advisor(
     crop_type: str = Query("aman_rice", description="Crop type"),
-    land_bigha: float = Query(3.5, description="Land area in Bigha")
+    land_bigha: float = Query(3.5, description="Land area in Bigha"),
+    lat: float = Query(24.7471, description="Latitude"),
+    lon: float = Query(90.4203, description="Longitude")
 ):
     """NASA SMAP Root-Zone Soil Moisture & Diesel Saving Irrigation Scheduler."""
-    return await NasaAgroService.calculate_smart_irrigation(crop_type, land_bigha)
+    return await NasaAgroService.calculate_smart_irrigation(crop_type, land_bigha, lat, lon)
 
 @router.get("/flash-flood-warning")
 async def get_flash_flood_warning(region: str = Query("haor", description="Haor or river basin")):

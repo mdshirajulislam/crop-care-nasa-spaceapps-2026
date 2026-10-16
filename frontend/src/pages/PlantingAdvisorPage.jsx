@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { fetchPlantingAdvice, fetchCropsList, fetchNasaClimatology } from '../utils/api';
+import { fetchPlantingAdvice, fetchCropsList, fetchNasaClimatology, fetchProfile } from '../utils/api';
 import { 
   Calendar, CloudSun, AlertTriangle, CheckCircle2, Droplets, Sparkles, 
   TrendingUp, Info, Loader2, Gauge, Sun, ShieldAlert, Award, ArrowRight,
-  Compass, BarChart3, ChevronRight, Check, Zap, HelpCircle
+  Compass, BarChart3, ChevronRight, Check, Zap, HelpCircle, MapPin
 } from 'lucide-react';
 import { 
   ResponsiveContainer, ComposedChart, AreaChart, Area, Bar, Line, 
@@ -20,6 +20,7 @@ export const PlantingAdvisorPage = () => {
   const [plantingDate, setPlantingDate] = useState('2026-07-20');
   const [adviceData, setAdviceData] = useState(null);
   const [climatologyData, setClimatologyData] = useState(null);
+  const [farmerProfile, setFarmerProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updatingDate, setUpdatingDate] = useState(false);
 
@@ -35,9 +36,14 @@ export const PlantingAdvisorPage = () => {
   useEffect(() => {
     const initData = async () => {
       try {
+        const prof = await fetchProfile().catch(() => null);
+        setFarmerProfile(prof);
+        const lat = prof?.lat;
+        const lon = prof?.lon;
+
         const [cList, clim] = await Promise.all([
           fetchCropsList(),
-          fetchNasaClimatology()
+          fetchNasaClimatology(lat, lon)
         ]);
         setCrops(cList);
         setClimatologyData(clim);
@@ -123,6 +129,12 @@ export const PlantingAdvisorPage = () => {
             <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-semibold">
               Optimal Sowing Index (OSI)
             </span>
+            {farmerProfile?.district && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 font-semibold">
+                <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                {[farmerProfile.upazila, farmerProfile.district, farmerProfile.ward].filter(Boolean).join(', ')} ({farmerProfile.lat?.toFixed(3)}°, {farmerProfile.lon?.toFixed(3)}°)
+              </span>
+            )}
           </div>
           <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-3xl leading-relaxed">
             {t.advisor.subtitle}

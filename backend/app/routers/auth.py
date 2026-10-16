@@ -17,6 +17,10 @@ class OTPVerify(BaseModel):
 class ProfileUpdate(BaseModel):
     name: Optional[str] = None
     village: Optional[str] = None
+    area_type: Optional[str] = None # union, pourashava, city_corporation
+    union_name: Optional[str] = None
+    union: Optional[str] = None
+    ward: Optional[str] = None
     upazila: Optional[str] = None
     district: Optional[str] = None
     language: Optional[str] = None
@@ -44,6 +48,8 @@ def verify_otp(req: OTPVerify, db: Session = Depends(get_db)):
             name="মোঃ সিরাজুল ইসলাম",
             phone=req.phone,
             village="চর নিলক্ষীয়া",
+            union_name="চর নিলক্ষীয়া ইউনিয়ন",
+            ward="ওয়ার্ড ১",
             upazila="ময়মনসিংহ সদর",
             district="ময়মনসিংহ",
             language="bn",
@@ -63,6 +69,8 @@ def verify_otp(req: OTPVerify, db: Session = Depends(get_db)):
             "name": user.name,
             "phone": user.phone,
             "village": user.village,
+            "union_name": user.union_name,
+            "ward": user.ward,
             "upazila": user.upazila,
             "district": user.district,
             "language": user.language,
@@ -89,12 +97,16 @@ def update_profile(data: ProfileUpdate, db: Session = Depends(get_db)):
         user = User()
         db.add(user)
     
-    if data.name: user.name = data.name
-    if data.village: user.village = data.village
-    if data.upazila: user.upazila = data.upazila
-    if data.district: user.district = data.district
-    if data.language: user.language = data.language
-    if data.preferred_land_unit: user.preferred_land_unit = data.preferred_land_unit
+    if data.name is not None: user.name = data.name
+    if data.village is not None: user.village = data.village
+    if data.area_type is not None: user.area_type = data.area_type
+    if data.union_name is not None: user.union_name = data.union_name
+    elif data.union is not None: user.union_name = data.union
+    if data.ward is not None: user.ward = data.ward
+    if data.upazila is not None: user.upazila = data.upazila
+    if data.district is not None: user.district = data.district
+    if data.language is not None: user.language = data.language
+    if data.preferred_land_unit is not None: user.preferred_land_unit = data.preferred_land_unit
     if data.lat is not None: user.lat = data.lat
     if data.lon is not None: user.lon = data.lon
     

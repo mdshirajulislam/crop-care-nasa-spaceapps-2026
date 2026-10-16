@@ -19,8 +19,10 @@ export const AdvancedNasaSection = ({ farmerProfile, plotData, onNavigateToMedic
   useEffect(() => {
     const loadNasaFeatures = async () => {
       try {
+        const lat = farmerProfile?.lat ?? 24.7471;
+        const lon = farmerProfile?.lon ?? 90.4203;
         const [irrData, floodData, radarData] = await Promise.all([
-          fetchIrrigationAdvisor('aman_rice', plotData?.area_value || 3.5),
+          fetchIrrigationAdvisor('aman_rice', plotData?.area_value || 3.5, lat, lon),
           fetchFlashFloodWarning('haor'),
           fetchPestRadar()
         ]);
@@ -34,7 +36,7 @@ export const AdvancedNasaSection = ({ farmerProfile, plotData, onNavigateToMedic
       }
     };
     loadNasaFeatures();
-  }, [plotData]);
+  }, [plotData, farmerProfile]);
 
   if (loading) {
     return null;

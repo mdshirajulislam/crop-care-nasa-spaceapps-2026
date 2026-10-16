@@ -36,6 +36,7 @@ function AppContent() {
       case 'lands':
         return <LandManagementPage />;
       case 'settings':
+      case 'profile':
         return <SettingsPage />;
       default:
         return <DashboardPage setActiveTab={setActiveTab} />;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
-import { Map, Layers, Calendar, Info, Activity, ZoomIn, Eye, Sparkles } from 'lucide-react';
-import { fetchNdviTimeSeries } from '../utils/api';
+import { Map, Layers, Calendar, Info, Activity, ZoomIn, Eye, Sparkles, MapPin } from 'lucide-react';
+import { fetchNdviTimeSeries, fetchProfile } from '../utils/api';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { toBanglaDigits } from '../utils/banglaNumbers';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,26 +11,30 @@ export const SatelliteMapPage = () => {
   const [activeLayer, setActiveLayer] = useState('satellite'); // satellite, ndvi, osm
   const [selectedTime, setSelectedTime] = useState('2026-10-01');
   const [ndviHistory, setNdviHistory] = useState([]);
+  const [farmerProfile, setFarmerProfile] = useState(null);
 
   useEffect(() => {
+    fetchProfile().then(p => setFarmerProfile(p)).catch(console.error);
     fetchNdviTimeSeries().then(data => setNdviHistory(data || [])).catch(console.error);
   }, []);
 
-  // Mymensingh Sadar plot coordinates (3.5 Bigha boundary)
-  const centerPos = [24.7471, 90.4203];
+  // Farmer specific center coordinates
+  const centerLat = farmerProfile?.lat || 24.7471;
+  const centerLon = farmerProfile?.lon || 90.4203;
+  const centerPos = [centerLat, centerLon];
   const plotPolygon = [
-    [24.7455, 90.4185],
-    [24.7485, 90.4190],
-    [24.7490, 90.4225],
-    [24.7460, 90.4220],
+    [centerLat - 0.0016, centerLon - 0.0018],
+    [centerLat + 0.0014, centerLon - 0.0013],
+    [centerLat + 0.0019, centerLon + 0.0022],
+    [centerLat - 0.0011, centerLon + 0.0017],
   ];
 
   // Weak zone inside plot
   const weakZonePolygon = [
-    [24.7462, 90.4195],
-    [24.7472, 90.4198],
-    [24.7470, 90.4210],
-    [24.7460, 90.4208],
+    [centerLat - 0.0009, centerLon - 0.0008],
+    [centerLat + 0.0001, centerLon - 0.0005],
+    [centerLat - 0.0001, centerLon + 0.0007],
+    [centerLat - 0.0011, centerLon + 0.0005],
   ];
 
   const ndviLegends = [
@@ -61,13 +65,19 @@ export const SatelliteMapPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center flex-wrap gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
               {t.satellite.title}
             </h1>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
               NASA GIBS / HLS 30m
             </span>
+            {farmerProfile?.district && (
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 font-semibold">
+                <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                {[farmerProfile.village, farmerProfile.ward, farmerProfile.union_name, farmerProfile.upazila, farmerProfile.district].filter(Boolean).join(', ')} ({farmerProfile.lat?.toFixed(4)}°, {farmerProfile.lon?.toFixed(4)}°)
+              </span>
+            )}
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
             {t.satellite.subtitle}
@@ -101,6 +111,7 @@ export const SatelliteMapPage = () => {
         <div className="lg:col-span-3 space-y-4">
           <div className="glass-card rounded-2xl overflow-hidden border border-slate-200 h-[460px] sm:h-[500px] relative shadow-sm">
             <MapContainer
+              key={centerPos.join(',')}
               center={centerPos}
               zoom={15}
               style={{ height: '100%', width: '100%' }}

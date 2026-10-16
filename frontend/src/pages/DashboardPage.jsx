@@ -21,16 +21,29 @@ export const DashboardPage = ({ setActiveTab }) => {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const [wData, pData, oData, prof] = await Promise.all([
-          fetchWeather(),
+        const prof = await fetchProfile().catch(() => null);
+        setProfileData(prof);
+        const lat = prof?.lat ?? 24.7471;
+        const lon = prof?.lon ?? 90.4203;
+
+        // Precise location string strictly from farmer's saved profile
+        const locParts = [
+          prof?.village,
+          prof?.ward,
+          prof?.union_name,
+          prof?.upazila,
+          prof?.district
+        ].filter(Boolean);
+        const locName = locParts.length > 0 ? locParts.join(', ') : '';
+
+        const [wData, pData, oData] = await Promise.all([
+          fetchWeather(lat, lon, locName),
           fetchPlots(),
-          fetchOutbreakAlerts(),
-          fetchProfile().catch(() => null)
+          fetchOutbreakAlerts()
         ]);
         setWeatherData(wData);
         setPlotData(pData);
         setOutbreaks(oData || []);
-        setProfileData(prof);
       } catch (err) {
         console.error("Dashboard data load error:", err);
       } finally {
@@ -66,9 +79,15 @@ export const DashboardPage = ({ setActiveTab }) => {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 {lang === 'bn' ? 'নাসা লাইভ কানেক্টেড' : 'NASA Live Telemetry Connected'}
               </span>
-              <span className="text-xs text-slate-300 font-medium">
-                {lang === 'bn' ? 'ময়মনসিংহ সদর • বোরো/আমন মওসুম' : 'Mymensingh Sadar • Season Active'}
-              </span>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className="text-xs text-slate-300 hover:text-emerald-300 font-medium transition-colors cursor-pointer flex items-center gap-1 hover:underline underline-offset-2"
+                title={lang === 'bn' ? 'প্রোফাইল ও অবস্থান দেখুন' : 'View Profile & Location'}
+              >
+                {profileData?.upazila 
+                  ? `${profileData.village ? profileData.village + ', ' : ''}${profileData.ward ? profileData.ward + ', ' : ''}${profileData.union_name ? profileData.union_name + ', ' : ''}${profileData.upazila}, ${profileData.district}`
+                  : (lang === 'bn' ? 'ময়মনসিংহ সদর • বোরো/আমন মওসুম' : 'Mymensingh Sadar • Season Active')}
+              </button>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1">
               {lang === 'bn' ? 'কৃষি ড্যাশবোর্ড ও স্যাটেলাইট মনিটরিং' : 'Agro Command Center & Satellite Telemetry'}
@@ -102,10 +121,14 @@ export const DashboardPage = ({ setActiveTab }) => {
       </div>
 
       {/* 1. Top Emergency / Spray Advisory Alert */}
-      <TopAlertBanner sprayAdvisor={sprayAdvisor} />
+      <TopAlertBanner 
+        sprayAdvisor={sprayAdvisor} 
+        farmerProfile={profileData}
+        onNavigateSettings={() => setActiveTab('settings')}
+      />
 
       {/* 2. Weather Forecast Card with accurate Bengali days & NASA baseline */}
-      <WeatherCard weatherData={weatherData} />
+      <WeatherCard weatherData={weatherData} farmerProfile={profileData} />
 
       {/* 3. Advanced NASA Earth Science Innovations (SMAP Irrigation, GPM Flash Flood, Parametric Insurance & Pest Radar) */}
       <AdvancedNasaSection 

@@ -87,12 +87,17 @@ class NasaAgroService:
         }
 
     @staticmethod
-    async def calculate_smart_irrigation(crop_type: str = "aman_rice", land_bigha: float = 3.5) -> Dict[str, Any]:
+    async def calculate_smart_irrigation(
+        crop_type: str = "aman_rice", 
+        land_bigha: float = 3.5,
+        lat: float = DEFAULT_LAT,
+        lon: float = DEFAULT_LON
+    ) -> Dict[str, Any]:
         """
         Uses REAL NASA POWER / SMAP surface & root-zone metrics.
         Calculates diesel fuel & electricity savings by holding irrigation when soil moisture is sufficient.
         """
-        nasa_data = await NasaAgroService.fetch_live_nasa_soil_moisture()
+        nasa_data = await NasaAgroService.fetch_live_nasa_soil_moisture(lat, lon)
         moisture_fraction = nasa_data["soil_moisture_fraction"]
         current_moisture_pct = int(round(moisture_fraction * 100))
 

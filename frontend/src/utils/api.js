@@ -1,14 +1,20 @@
 const API_BASE = '/api/v1';
 
 // --- Weather & Climatology ---
-export const fetchWeather = async () => {
-  const res = await fetch(`${API_BASE}/weather/forecast`);
+export const fetchWeather = async (lat = null, lon = null, locationName = '') => {
+  const params = new URLSearchParams();
+  if (lat !== null && lat !== undefined) params.append('lat', lat);
+  if (lon !== null && lon !== undefined) params.append('lon', lon);
+  if (locationName) params.append('location_name', locationName);
+  const query = params.toString() ? `?${params.toString()}` : '';
+  const res = await fetch(`${API_BASE}/weather/forecast${query}`);
   if (!res.ok) throw new Error('Weather API error');
   return res.json();
 };
 
-export const fetchNasaClimatology = async () => {
-  const res = await fetch(`${API_BASE}/weather/nasa-climatology`);
+export const fetchNasaClimatology = async (lat = null, lon = null) => {
+  const query = (lat !== null && lon !== null && lat !== undefined && lon !== undefined) ? `?lat=${lat}&lon=${lon}` : '';
+  const res = await fetch(`${API_BASE}/weather/nasa-climatology${query}`);
   if (!res.ok) throw new Error('Climatology API error');
   return res.json();
 };
@@ -234,8 +240,12 @@ export const updateProfile = async (data) => {
 };
 
 // --- Advanced NASA Features (100% Free NASA Earth Science Data) ---
-export const fetchIrrigationAdvisor = async (cropType = 'aman_rice', landBigha = 3.5) => {
-  const res = await fetch(`${API_BASE}/nasa-features/irrigation-advisor?crop_type=${cropType}&land_bigha=${landBigha}`);
+export const fetchIrrigationAdvisor = async (cropType = 'aman_rice', landBigha = 3.5, lat = null, lon = null) => {
+  let url = `${API_BASE}/nasa-features/irrigation-advisor?crop_type=${cropType}&land_bigha=${landBigha}`;
+  if (lat !== null && lon !== null && lat !== undefined && lon !== undefined) {
+    url += `&lat=${lat}&lon=${lon}`;
+  }
+  const res = await fetch(url);
   if (!res.ok) throw new Error('Irrigation advisor error');
   return res.json();
 };
