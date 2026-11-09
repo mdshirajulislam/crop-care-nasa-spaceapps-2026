@@ -35,3 +35,6 @@ Thumbs.db
 # Scratch and temp files
 scratch/
 
+
+cloudflared.exe
+cf.exe
