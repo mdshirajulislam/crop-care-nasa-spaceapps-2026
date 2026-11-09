@@ -19,7 +19,13 @@ services:
     plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://crop-care-backend.onrender.com
     routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://crop-care-backend.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
