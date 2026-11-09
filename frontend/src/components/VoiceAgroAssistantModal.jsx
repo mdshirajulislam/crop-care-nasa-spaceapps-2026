@@ -105,8 +105,9 @@ export const VoiceAgroAssistantModal = ({ isOpen, onClose, currentPlot, farmerPr
   const playAudio = (audioUrl, text, messageId = null) => {
     stopSpeaking();
 
-    // Use Edge-TTS endpoint if audioUrl not directly passed
-    const targetUrl = audioUrl || `/api/v1/chat/tts?text=${encodeURIComponent(text)}&voice=${selectedVoice}`;
+    const apiPrefix = import.meta.env.VITE_API_BASE_URL || '';
+    const rawUrl = audioUrl || `/api/v1/chat/tts?text=${encodeURIComponent(text)}&voice=${selectedVoice}`;
+    const targetUrl = (rawUrl.startsWith('http') || !apiPrefix) ? rawUrl : `${apiPrefix}${rawUrl}`;
 
     try {
       const audio = new Audio(targetUrl);

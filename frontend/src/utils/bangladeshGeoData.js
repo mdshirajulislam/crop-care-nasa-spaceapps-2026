@@ -1220,7 +1220,8 @@ export const findNearestLocation = (lat, lon) => {
 // Reverse Geocoding via Backend API + Offline Fallback
 export const reverseGeocodeCoordinates = async (lat, lon) => {
   try {
-    const backendUrl = `/api/v1/weather/reverse-geocode?lat=${lat}&lon=${lon}`;
+    const apiBase = import.meta.env.VITE_API_BASE_URL || '';
+    const backendUrl = `${apiBase}/api/v1/weather/reverse-geocode?lat=${lat}&lon=${lon}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4500);
 
@@ -1491,7 +1492,8 @@ export const forwardGeocodeAddress = async (queryText) => {
   if (!parsed) return null;
 
   try {
-    const backendUrl = `/api/v1/weather/forward-geocode?query=${encodeURIComponent(queryText)}&district=${encodeURIComponent(parsed.district || '')}&upazila=${encodeURIComponent(parsed.upazila || '')}&union_name=${encodeURIComponent(parsed.union_name || '')}&ward=${encodeURIComponent(parsed.ward || '')}&village=${encodeURIComponent(parsed.village || '')}`;
+    const apiBase = import.meta.env.VITE_API_BASE_URL || '';
+    const backendUrl = `${apiBase}/api/v1/weather/forward-geocode?query=${encodeURIComponent(queryText)}&district=${encodeURIComponent(parsed.district || '')}&upazila=${encodeURIComponent(parsed.upazila || '')}&union_name=${encodeURIComponent(parsed.union_name || '')}&ward=${encodeURIComponent(parsed.ward || '')}&village=${encodeURIComponent(parsed.village || '')}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500);
 

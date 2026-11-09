@@ -46,7 +46,8 @@ export const VoiceProvider = ({ children }) => {
 
     // Primary Engine: Microsoft Edge-TTS Neural Audio Stream
     const targetVoice = voicePersona;
-    const ttsUrl = `/api/v1/chat/tts?text=${encodeURIComponent(text.trim())}&voice=${targetVoice}`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    const ttsUrl = `${baseUrl}/api/v1/chat/tts?text=${encodeURIComponent(text.trim())}&voice=${targetVoice}`;
 
     try {
       const audio = new Audio(ttsUrl);
