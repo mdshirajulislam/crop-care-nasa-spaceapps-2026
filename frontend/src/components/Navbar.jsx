@@ -3,7 +3,7 @@ import { Sprout, CloudSun, Stethoscope, BookOpen, Map, MessageSquare, Settings, 
 import { useLanguage } from '../contexts/LanguageContext';
 import { fetchProfile } from '../utils/api';
 
-export const Navbar = ({ activeTab, setActiveTab }) => {
+export const Navbar = ({ activeTab, setActiveTab, onOpenAuth }) => {
   const { lang, toggleLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -91,6 +91,16 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               <span>{lang === 'bn' ? 'English' : 'বাংলা'}</span>
             </button>
 
+            {/* Quick Login / Sign In Button */}
+            <button
+              onClick={onOpenAuth}
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition-all cursor-pointer"
+              title={lang === 'bn' ? 'লগইন বা অ্যাকাউন্ট তৈরি করুন' : 'Sign In or Create Account'}
+            >
+              <User className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{lang === 'bn' ? 'লগইন' : 'Sign In'}</span>
+            </button>
+
             {/* Profile Avatar Badge - Clickable Button */}
             <button
               onClick={() => setActiveTab('settings')}
@@ -131,36 +141,47 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-4 space-y-1 shadow-xl animate-fadeIn">
           {/* Mobile Profile Header Button */}
-          <button
-            onClick={() => {
-              setActiveTab('settings');
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center space-x-3 p-3 rounded-2xl border transition-all mb-2 text-left cursor-pointer ${
-              isProfileActive
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'bg-emerald-50/90 hover:bg-emerald-100 border-emerald-200 text-slate-800'
-            }`}
-          >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-xs ${
-              isProfileActive ? 'bg-white text-emerald-700' : 'bg-emerald-600 text-white'
-            }`}>
-              {userInitial}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className={`text-sm font-bold truncate ${
-                isProfileActive ? 'text-white' : 'text-slate-900'
+          <div className="flex gap-2 mb-2">
+            <button
+              onClick={() => {
+                setActiveTab('settings');
+                setMobileMenuOpen(false);
+              }}
+              className={`flex-1 flex items-center space-x-3 p-3 rounded-2xl border transition-all text-left cursor-pointer ${
+                isProfileActive
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'bg-emerald-50/90 hover:bg-emerald-100 border-emerald-200 text-slate-800'
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-xs ${
+                isProfileActive ? 'bg-white text-emerald-700' : 'bg-emerald-600 text-white'
               }`}>
-                {profile?.name || (lang === 'bn' ? 'মোঃ সিরাজুল ইসলাম' : 'Md. Sirajul Islam')}
+                {userInitial}
               </div>
-              <div className={`text-xs ${
-                isProfileActive ? 'text-emerald-100' : 'text-emerald-700 font-medium'
-              }`}>
-                {profile?.upazila ? `${profile.upazila}, ` : ''}{userDistrict} • {lang === 'bn' ? 'প্রোফাইল ও সেটিংস খুলুন' : 'Open Profile & Settings'}
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-bold truncate ${
+                  isProfileActive ? 'text-white' : 'text-slate-900'
+                }`}>
+                  {profile?.name || (lang === 'bn' ? 'মোঃ সিরাজুল ইসলাম' : 'Md. Sirajul Islam')}
+                </div>
+                <div className={`text-xs ${
+                  isProfileActive ? 'text-emerald-100' : 'text-emerald-700 font-medium'
+                }`}>
+                  {profile?.upazila ? `${profile.upazila}, ` : ''}{userDistrict}
+                </div>
               </div>
-            </div>
-            <User className={`w-5 h-5 ${isProfileActive ? 'text-white' : 'text-emerald-600'}`} />
-          </button>
+            </button>
+            <button
+              onClick={() => {
+                onOpenAuth();
+                setMobileMenuOpen(false);
+              }}
+              className="px-4 py-3 rounded-2xl bg-emerald-600 text-white font-bold text-xs flex flex-col items-center justify-center cursor-pointer shadow-sm"
+            >
+              <User className="w-5 h-5 mb-0.5" />
+              <span>{lang === 'bn' ? 'লগইন' : 'Login'}</span>
+            </button>
+          </div>
 
           {navItems.map((item) => {
             const Icon = item.icon;

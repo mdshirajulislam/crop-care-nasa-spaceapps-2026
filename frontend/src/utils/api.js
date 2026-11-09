@@ -334,4 +334,37 @@ export const calculateEmergencyHarvest = async (data) => {
   return res.json();
 };
 
+// --- Authentication (Email & Password / OTP) ---
+export const registerUser = async ({ name, email, password }) => {
+  const res = await fetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Registration failed');
+  }
+  return res.json();
+};
+
+export const loginUser = async ({ email, password }) => {
+  const res = await fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Login failed');
+  }
+  return res.json();
+};
+
+export const getCurrentUser = async () => {
+  const res = await fetch(`${API_BASE}/auth/user`);
+  if (!res.ok) throw new Error('Failed to fetch user profile');
+  return res.json();
+};
+
 

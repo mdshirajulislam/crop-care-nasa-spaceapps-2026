@@ -8,6 +8,8 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), default="মোঃ সিরাজুল ইসলাম")
+    email = Column(String(120), unique=True, index=True, nullable=True)
+    password_hash = Column(String(255), nullable=True)
     phone = Column(String(20), unique=True, index=True, default="01712345678")
     village = Column(String(100), default="চর নিলক্ষীয়া")
     area_type = Column(String(50), default="union") # union (গ্রাম/ইউনিয়ন), pourashava (পৌরসভা), city_corporation (সিটি কর্পোরেশন)

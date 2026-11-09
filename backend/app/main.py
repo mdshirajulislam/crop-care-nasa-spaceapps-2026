@@ -7,6 +7,22 @@ from app.routers import auth, plots, weather, planting, disease, diary, chat, sa
 # Initialize DB tables
 Base.metadata.create_all(bind=engine)
 
+# Auto-migrate SQLite columns if table already existed
+try:
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        for col_name, col_type in [
+            ("email", "VARCHAR(120)"),
+            ("password_hash", "VARCHAR(255)")
+        ]:
+            try:
+                conn.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type};"))
+                conn.commit()
+            except Exception:
+                pass
+except Exception:
+    pass
+
 # Auto-seed if database is fresh
 try:
     from app.database import SessionLocal
@@ -37,16 +53,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register all Routers
-app.include_router(auth.router, prefix="/api/v1")
-app.include_router(plots.router, prefix="/api/v1")
-app.include_router(weather.router, prefix="/api/v1")
-app.include_router(planting.router, prefix="/api/v1")
-app.include_router(disease.router, prefix="/api/v1")
-app.include_router(diary.router, prefix="/api/v1")
-app.include_router(chat.router, prefix="/api/v1")
-app.include_router(satellite.router, prefix="/api/v1")
-app.include_router(nasa_features.router, prefix="/api/v1")
+# Register all Routers under both /api/v1 and /api (for backward compatibility)
+for pfx in ["/api/v1", "/api"]:
+    app.include_router(auth.router, prefix=pfx)
+    app.include_router(plots.router, prefix=pfx)
+    app.include_router(weather.router, prefix=pfx)
+    app.include_router(planting.router, prefix=pfx)
+    app.include_router(disease.router, prefix=pfx)
+    app.include_router(diary.router, prefix=pfx)
+    app.include_router(chat.router, prefix=pfx)
+    app.include_router(satellite.router, prefix=pfx)
+    app.include_router(nasa_features.router, prefix=pfx)
 
 @app.get("/")
 def root():

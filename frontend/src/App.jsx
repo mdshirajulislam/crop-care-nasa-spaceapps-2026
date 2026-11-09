@@ -12,11 +12,13 @@ import { ExpertChatPage } from './pages/ExpertChatPage';
 import { LandManagementPage } from './pages/LandManagementPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { VoiceAgroAssistantModal } from './components/VoiceAgroAssistantModal';
+import { AuthModal } from './components/AuthModal';
 import { Mic, Sparkles } from 'lucide-react';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { lang, t } = useLanguage();
 
   const renderActivePage = () => {
@@ -48,12 +50,19 @@ function AppContent() {
   return (
     <div className={`min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col ${lang === 'bn' ? 'font-bengali' : 'font-sans'}`}>
       {/* Top Navigation */}
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} onOpenAuth={() => setAuthModalOpen(true)} />
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
         {renderActivePage()}
       </main>
+
+      {/* Auth Modal (Login / Signup) */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onAuthSuccess={() => setActiveTab('settings')}
+      />
 
       {/* Global Sleek Voice Agro Assistant Floating Action Button */}
       <button
