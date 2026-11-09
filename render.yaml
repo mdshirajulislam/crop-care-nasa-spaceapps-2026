@@ -21,11 +21,11 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://crop-care-backend.onrender.com
+        value: https://crop-care-nasa-spaceapps-2026.onrender.com
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://crop-care-backend.onrender.com/api/*
+        destination: https://crop-care-nasa-spaceapps-2026.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
