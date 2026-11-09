@@ -7,6 +7,21 @@ from app.routers import auth, plots, weather, planting, disease, diary, chat, sa
 # Initialize DB tables
 Base.metadata.create_all(bind=engine)
 
+# Auto-seed if database is fresh
+try:
+    from app.database import SessionLocal
+    from app.models.models import User
+    _db = SessionLocal()
+    if not _db.query(User).first():
+        try:
+            from seed_data import seed_database
+            seed_database()
+        except Exception:
+            pass
+    _db.close()
+except Exception:
+    pass
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Bangladeshi Farmer Agro-Intelligence PWA powered by NASA Earth Science Data, Open-Meteo & AI Vision",
