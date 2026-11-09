@@ -12,6 +12,22 @@ class InsuranceRequest(BaseModel):
     land_bigha: Optional[float] = 3.5
     hazard_type: Optional[str] = "excess_rain"
 
+class HarvestCalcRequest(BaseModel):
+    crop_maturity_pct: Optional[int] = 80
+    land_bigha: Optional[float] = 3.5
+    crop_name: Optional[str] = "বোরো ধান"
+    market_price_per_maund: Optional[float] = 1150.0
+
+@router.post("/emergency-harvest-calculator")
+def get_emergency_harvest_analysis(req: HarvestCalcRequest):
+    """Calculates Net Financial Salvage vs Potential Loss from Flood/Hailstorm (BRRI Model)."""
+    return NasaAgroService.calculate_emergency_harvest(
+        crop_maturity_pct=req.crop_maturity_pct or 80,
+        land_bigha=req.land_bigha or 3.5,
+        crop_name=req.crop_name or "বোরো ধান",
+        market_price_per_maund=req.market_price_per_maund or 1150.0
+    )
+
 @router.get("/irrigation-advisor")
 async def get_irrigation_advisor(
     crop_type: str = Query("aman_rice", description="Crop type"),
@@ -42,3 +58,13 @@ async def create_insurance_certificate(req: InsuranceRequest):
 def get_pest_radar():
     """Crowdsourced Pest & Disease Outbreak Live Community Radar."""
     return NasaAgroService.get_community_pest_reports()
+
+@router.get("/thermal-stress")
+async def get_canopy_thermal_stress(
+    crop_type: str = Query("aman_rice", description="Crop type"),
+    land_bigha: float = Query(3.5, description="Land area in Bigha"),
+    lat: float = Query(24.7471, description="Latitude"),
+    lon: float = Query(90.4203, description="Longitude")
+):
+    """NASA ECOSTRESS (ISS Thermal Radiometer) Canopy Temperature, Transpiration & Hidden Thirst Detector."""
+    return await NasaAgroService.calculate_canopy_thermal_stress(crop_type, lat, lon, land_bigha)

@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.models import Plot, User
+from app.services.crop_care_advisor import CropCareAdvisorService
 from pydantic import BaseModel
 from typing import Optional, List
+import json
 
 router = APIRouter(prefix="/plots", tags=["Land & Plot Management"])
 
@@ -31,6 +33,21 @@ class PlotUpdate(BaseModel):
     health_status: Optional[str] = None
     ndvi_score: Optional[float] = None
     polygon_geojson: Optional[str] = None
+    completed_tasks: Optional[str] = None
+
+class ToggleTaskRequest(BaseModel):
+    task_id: str
+    completed: bool
+
+class AdvisoryCalculateRequest(BaseModel):
+    crop_name: str
+    planting_date: Optional[str] = "2026-07-20"
+    crop_variety: Optional[str] = ""
+    soil_type: Optional[str] = "দোআঁশ মাটি"
+    area_value: float = 1.0
+    area_unit: str = "bigha"
+    irrigation_source: Optional[str] = "গভীর নলকূপ"
+    completed_tasks: Optional[List[str]] = []
 
 @router.get("/")
 def get_plots(db: Session = Depends(get_db)):
@@ -51,7 +68,8 @@ def get_plots(db: Session = Depends(get_db)):
             irrigation_source="গভীর নলকূপ",
             current_stage="কুশি গজানো পর্যায় (Tillering Stage)",
             health_status="ভালো (Good)",
-            ndvi_score=0.68
+            ndvi_score=0.68,
+            completed_tasks="[]"
         )
         db.add(default_plot)
         db.commit()
@@ -70,10 +88,84 @@ def get_plots(db: Session = Depends(get_db)):
         }
     }
 
+@router.post("/calculate-advisory")
+def calculate_advisory(data: AdvisoryCalculateRequest):
+    advisory = CropCareAdvisorService.generate_crop_advisory(
+        crop_name=data.crop_name,
+        planting_date_str=data.planting_date or "2026-07-20",
+        crop_variety=data.crop_variety,
+        soil_type=data.soil_type,
+        area_value=data.area_value,
+        area_unit=data.area_unit,
+        irrigation_source=data.irrigation_source,
+        completed_tasks_list=data.completed_tasks or []
+    )
+    return advisory
+
+@router.get("/{plot_id}/advisory")
+def get_plot_advisory(plot_id: int, db: Session = Depends(get_db)):
+    plot = db.query(Plot).filter(Plot.id == plot_id).first()
+    if not plot:
+        raise HTTPException(status_code=404, detail="প্লট পাওয়া যায়নি")
+    
+    try:
+        completed = json.loads(plot.completed_tasks or "[]")
+    except Exception:
+        completed = []
+        
+    advisory = CropCareAdvisorService.generate_crop_advisory(
+        crop_name=plot.crop_name,
+        planting_date_str=plot.planting_date or "2026-07-20",
+        crop_variety=plot.crop_variety,
+        soil_type=plot.soil_type,
+        area_value=plot.area_value,
+        area_unit=plot.area_unit or "bigha",
+        irrigation_source=plot.irrigation_source,
+        completed_tasks_list=completed
+    )
+    advisory["plot_id"] = plot.id
+    advisory["plot_name"] = plot.name
+    return advisory
+
+@router.post("/{plot_id}/toggle-task")
+def toggle_plot_task(plot_id: int, data: ToggleTaskRequest, db: Session = Depends(get_db)):
+    plot = db.query(Plot).filter(Plot.id == plot_id).first()
+    if not plot:
+        raise HTTPException(status_code=404, detail="প্লট পাওয়া যায়নি")
+    
+    try:
+        tasks = json.loads(plot.completed_tasks or "[]")
+    except Exception:
+        tasks = []
+    
+    if data.completed:
+        if data.task_id not in tasks:
+            tasks.append(data.task_id)
+    else:
+        if data.task_id in tasks:
+            tasks.remove(data.task_id)
+            
+    plot.completed_tasks = json.dumps(tasks)
+    db.commit()
+    db.refresh(plot)
+    return {"status": "success", "completed_tasks": tasks}
+
 @router.post("/")
 def create_plot(data: PlotCreate, db: Session = Depends(get_db)):
     user = db.query(User).first()
     user_id = user.id if user else 1
+
+    # Auto-calculate current growth stage from real sowing date
+    temp_adv = CropCareAdvisorService.generate_crop_advisory(
+        crop_name=data.crop_name,
+        planting_date_str=data.planting_date or "2026-07-20",
+        crop_variety=data.crop_variety,
+        soil_type=data.soil_type,
+        area_value=data.area_value,
+        area_unit=data.area_unit,
+        irrigation_source=data.irrigation_source
+    )
+    stage_name = temp_adv["planting_info"]["current_stage"]["name_bn"]
 
     new_plot = Plot(
         user_id=user_id,
@@ -86,9 +178,10 @@ def create_plot(data: PlotCreate, db: Session = Depends(get_db)):
         soil_type=data.soil_type or "দোআঁশ মাটি",
         irrigation_source=data.irrigation_source or "গভীর নলকূপ",
         polygon_geojson=data.polygon_geojson,
-        current_stage="চারা রোপণ পর্যায়",
+        current_stage=stage_name,
         health_status="ভালো (Good)",
-        ndvi_score=0.65
+        ndvi_score=0.65,
+        completed_tasks="[]"
     )
     db.add(new_plot)
     db.commit()
@@ -113,6 +206,7 @@ def update_plot(plot_id: int, data: PlotUpdate, db: Session = Depends(get_db)):
     if data.health_status is not None: plot.health_status = data.health_status
     if data.ndvi_score is not None: plot.ndvi_score = data.ndvi_score
     if data.polygon_geojson is not None: plot.polygon_geojson = data.polygon_geojson
+    if data.completed_tasks is not None: plot.completed_tasks = data.completed_tasks
 
     db.commit()
     db.refresh(plot)

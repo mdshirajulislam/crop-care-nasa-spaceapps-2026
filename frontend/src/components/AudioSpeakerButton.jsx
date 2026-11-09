@@ -4,12 +4,14 @@ import { useVoice } from '../contexts/VoiceContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const AudioSpeakerButton = ({ text, className = "", size = 18 }) => {
-  const { speak, stopSpeaking, isSpeaking } = useVoice();
+  const { speak, stopSpeaking, isSpeaking, currentText } = useVoice();
   const { lang } = useLanguage();
+
+  const isCurrentPlaying = isSpeaking && currentText === text;
 
   const handleToggle = (e) => {
     e.stopPropagation();
-    if (isSpeaking) {
+    if (isCurrentPlaying) {
       stopSpeaking();
     } else {
       speak(text, lang === 'en' ? 'en' : 'bn');
@@ -18,12 +20,17 @@ export const AudioSpeakerButton = ({ text, className = "", size = 18 }) => {
 
   return (
     <button
+      type="button"
       onClick={handleToggle}
-      title={lang === 'bn' ? "পড়ে শুনুন" : "Listen aloud"}
+      title={isCurrentPlaying ? (lang === 'bn' ? "ভয়েস থামান" : "Stop listening") : (lang === 'bn' ? "ন্যাচারাল ভয়েসে শুনুন" : "Listen aloud")}
       aria-label="Voice Readout"
-      className={`p-1.5 rounded-full bg-agro-600/30 hover:bg-agro-500/50 text-agro-300 border border-agro-500/30 transition-all ${className}`}
+      className={`p-1.5 rounded-full transition-all flex items-center justify-center ${
+        isCurrentPlaying
+          ? 'bg-rose-500/20 text-rose-500 border border-rose-400/40 ring-2 ring-rose-400/30 animate-pulse'
+          : 'bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 border border-emerald-500/30'
+      } ${className}`}
     >
-      {isSpeaking ? <VolumeX size={size} className="text-red-400 animate-pulse" /> : <Volume2 size={size} />}
+      {isCurrentPlaying ? <VolumeX size={size} className="text-rose-500" /> : <Volume2 size={size} />}
     </button>
   );
 };

@@ -1,11 +1,20 @@
 import React from 'react';
-import { Camera, Calendar, PlusCircle, MessageSquareQuote, ShieldAlert } from 'lucide-react';
+import { Camera, Calendar, PlusCircle, MessageSquareQuote, ShieldAlert, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const QuickActionGrid = ({ onNavigate }) => {
   const { lang, t } = useLanguage();
 
   const actions = [
+    {
+      id: 'care_schedule',
+      title: lang === 'bn' ? 'ফসলের এন্ট্রি ও স্প্রে সময়সূচী' : 'Crop Care & Spray Schedule',
+      subtitle: lang === 'bn' ? 'ফসল ও রোপণের তারিখ দিয়ে সার ও স্প্রে ক্যালেন্ডার পান' : 'Instant fertilizer & spray calendar for your crop',
+      icon: Sparkles,
+      color: 'from-emerald-700 to-teal-600',
+      shadowColor: 'shadow-emerald-900/40',
+      badge: lang === 'bn' ? 'নতুন পরিচর্যা' : 'New Advisory'
+    },
     {
       id: 'diagnosis',
       title: t.quickActions.takePhoto,
@@ -53,7 +62,7 @@ export const QuickActionGrid = ({ onNavigate }) => {
         <span className="text-xs text-slate-500 font-medium">{t.quickActions.sectionSubtitle}</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {actions.map((act) => {
           const Icon = act.icon;
           return (

@@ -3,9 +3,10 @@ import { MapContainer, TileLayer, Marker, Polygon, Popup, useMapEvents, useMap }
 import L from 'leaflet';
 import { 
   MapPin, Layers, Navigation, Trash2, CheckCircle2, 
-  HelpCircle, Sparkles, Compass, AlertCircle, Edit2
+  HelpCircle, Sparkles, Compass, AlertCircle, Edit2, Search, Crosshair, ChevronDown
 } from 'lucide-react';
 import { toBanglaDigits } from '../utils/banglaNumbers';
+import { DISTRICTS_DATA, parseBangladeshAddress } from '../utils/bangladeshGeoData';
 
 // Green Field Pin for existing plots
 const plotGreenIcon = new L.DivIcon({
@@ -89,7 +90,6 @@ function FarmPlotMapHandler({
       const { lat, lng } = e.latlng;
 
       if (mode === 'polygon') {
-        // Add boundary vertex
         const updatedPoints = [...polygonPoints, [lat, lng]];
         setPolygonPoints(updatedPoints);
         if (onPlotCoordinatesChange) {
@@ -116,26 +116,25 @@ function FarmPlotMapHandler({
   return null;
 }
 
-// Controller to fly map when target coordinate changes externally
-function MapCenterFlyer({ center }) {
+// Controller to smoothly fly map when target coordinate changes externally
+function MapCenterFlyer({ center, zoom = 15 }) {
   const map = useMap();
   useEffect(() => {
     if (map && center && center[0] && center[1]) {
       const timer = setTimeout(() => {
         map.invalidateSize();
-        map.flyTo(center, 15, { duration: 0.8 });
+        map.flyTo(center, zoom, { duration: 1.0 });
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [center?.[0], center?.[1], map]);
+  }, [center?.[0], center?.[1], zoom, map]);
   return null;
 }
 
-// Calculate approximate area in Bigha and Decimal from polygon coordinates (Shoelace Formula on lat/lon)
+// Calculate approximate area in Bigha and Decimal from polygon coordinates
 function calculatePolygonArea(latLngs) {
   if (!latLngs || latLngs.length < 3) return { bigha: 0, decimal: 0, sqMeters: 0 };
   
-  // Earth radius in meters
   const R = 6378137;
   let area = 0;
   const numCoords = latLngs.length;
@@ -152,10 +151,7 @@ function calculatePolygonArea(latLngs) {
     area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
   }
 
-  area = Math.abs((area * R * R) / 4.0); // area in square meters
-  
-  // 1 Decimal (শতক) = 40.4686 sq meters
-  // 1 Bigha (বিঘা) = 33 Decimal = ~1335.46 sq meters
+  area = Math.abs((area * R * R) / 4.0);
   const decimal = area / 40.4686;
   const bigha = decimal / 33.0;
 
@@ -174,17 +170,30 @@ export const FarmPlotSatelliteMap = ({
   initialCenter = [24.7471, 90.4203],
   onBoundaryUpdate = null
 }) => {
-  const [mapLayer, setMapLayer] = useState('satellite'); // 'satellite', 'street'
+  const [mapLayer, setMapLayer] = useState('google_hybrid'); // 'google_hybrid', 'osm', 'satellite'
   const [drawMode, setDrawMode] = useState('pin'); // 'pin' or 'polygon'
   const [centerPin, setCenterPin] = useState(initialCenter);
+  const [targetCenter, setTargetCenter] = useState(initialCenter);
+  const [targetZoom, setTargetZoom] = useState(15);
   const [polygonPoints, setPolygonPoints] = useState([]);
   const [calculatedArea, setCalculatedArea] = useState(null);
   const [locating, setLocating] = useState(false);
+
+  // Search & District/Upazila Jumper State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedUpazila, setSelectedUpazila] = useState('');
+
+  const districtList = Object.keys(DISTRICTS_DATA).sort();
+  const upazilaList = selectedDistrict && DISTRICTS_DATA[selectedDistrict]?.upazilas 
+    ? Object.keys(DISTRICTS_DATA[selectedDistrict].upazilas).sort() 
+    : [];
 
   // Sync initial coordinates if provided
   useEffect(() => {
     if (initialCenter && initialCenter[0] && initialCenter[1]) {
       setCenterPin(initialCenter);
+      setTargetCenter(initialCenter);
     }
   }, [initialCenter?.[0], initialCenter?.[1]]);
 
@@ -220,14 +229,19 @@ export const FarmPlotSatelliteMap = ({
 
   const handleCurrentGPS = () => {
     if (!navigator.geolocation) {
-      alert("আপনার ডিভাইসে জিপিএস পাওয়া যায়নি।");
+      alert("আপনার ডিভাইসে জিপিএস পাওয়া যায়নি। অনুগ্রহ করে উপরের জেলা ও উপজেলা সিলেক্ট করে জমিতে যান।");
       return;
     }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = [pos.coords.latitude, pos.coords.longitude];
+        const coords = [
+          parseFloat(pos.coords.latitude.toFixed(5)), 
+          parseFloat(pos.coords.longitude.toFixed(5))
+        ];
         setCenterPin(coords);
+        setTargetCenter(coords);
+        setTargetZoom(16);
         setLocating(false);
         if (onBoundaryUpdate) {
           onBoundaryUpdate({
@@ -237,12 +251,61 @@ export const FarmPlotSatelliteMap = ({
         }
       },
       (err) => {
-        console.error(err);
+        console.error("GPS error:", err);
         setLocating(false);
-        alert("জিপিএস তথ্য নেওয়া যায়নি। অনুগ্রহ করে ম্যাপে ক্লিক করে জমি সিলেক্ট করুন।");
+        alert("জিপিএস লোকেশন পাওয়া যায়নি। অনুগ্রহ করে উপরের জেলা ও উপজেলা ড্রপডাউন থেকে আপনার এলাকা বেছে নিন।");
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 8000 }
     );
+  };
+
+  const handleDistrictChange = (distName) => {
+    setSelectedDistrict(distName);
+    setSelectedUpazila('');
+    if (distName && DISTRICTS_DATA[distName]) {
+      const d = DISTRICTS_DATA[distName];
+      const newPos = [d.lat, d.lon];
+      setTargetCenter(newPos);
+      setCenterPin(newPos);
+      setTargetZoom(13);
+      if (onBoundaryUpdate) {
+        onBoundaryUpdate({ type: 'point', center: newPos });
+      }
+    }
+  };
+
+  const handleUpazilaChange = (upaName) => {
+    setSelectedUpazila(upaName);
+    if (selectedDistrict && upaName && DISTRICTS_DATA[selectedDistrict]?.upazilas?.[upaName]) {
+      const u = DISTRICTS_DATA[selectedDistrict].upazilas[upaName];
+      const newPos = [u.lat, u.lon];
+      setTargetCenter(newPos);
+      setCenterPin(newPos);
+      setTargetZoom(15);
+      if (onBoundaryUpdate) {
+        onBoundaryUpdate({ type: 'point', center: newPos });
+      }
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    const parsed = parseBangladeshAddress(searchQuery);
+    if (parsed && parsed.lat && parsed.lon) {
+      const newPos = [parsed.lat, parsed.lon];
+      setTargetCenter(newPos);
+      setCenterPin(newPos);
+      setTargetZoom(16);
+      if (parsed.district) setSelectedDistrict(parsed.district);
+      if (parsed.upazila) setSelectedUpazila(parsed.upazila);
+      if (onBoundaryUpdate) {
+        onBoundaryUpdate({ type: 'point', center: newPos });
+      }
+    } else {
+      alert("এলাকা খুঁজে পাওয়া যায়নি। অনুগ্রহ করে জেলা ও উপজেলা নির্বাচন করুন।");
+    }
   };
 
   const clearDrawing = () => {
@@ -257,90 +320,117 @@ export const FarmPlotSatelliteMap = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md overflow-hidden flex flex-col">
-      {/* Top Map Control Bar */}
-      <div className="p-3 sm:p-4 bg-slate-50/90 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
-            <Layers className="w-4 h-4" />
-          </div>
+    <div className="bg-white rounded-3xl border border-slate-200/90 shadow-md overflow-hidden flex flex-col">
+      
+      {/* 1. Quick Location Jumper & Search Bar */}
+      <div className="p-3 sm:p-4 bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
-            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <span>স্যাটেলাইট জমির ম্যাপ ও সীমানা নির্ধারণ</span>
-              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300 font-mono font-medium">
-                NASA SMAP & Landsat Live View
+            <h4 className="text-sm font-bold flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                <MapPin className="w-4 h-4" />
               </span>
+              <span>জমি নির্বাচন ও এলাকা সন্ধান (Find Your Farm)</span>
             </h4>
-            <p className="text-[11px] text-slate-500">
-              ম্যাপে ক্লিক করে আপনার জমির সঠিক অবস্থান বা ৪ কোণা দাগ দিয়ে বাউন্ডারি চিহ্নিত করুন
+            <p className="text-[11px] text-emerald-200/90 mt-0.5">
+              জেলা ও উপজেলা সিলেক্ট করলেই স্যাটেলাইট ম্যাপ সরাসরি আপনার এলাকার মাঠে চলে যাবে
             </p>
           </div>
-        </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Layer Switcher */}
-          <div className="bg-slate-200/80 p-0.5 rounded-lg border border-slate-300 flex text-xs">
-            <button
-              type="button"
-              onClick={() => setMapLayer('satellite')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
-                mapLayer === 'satellite'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-700 hover:text-slate-900'
-              }`}
-            >
-              🛰️ স্যাটেলাইট ভিউ
-            </button>
-            <button
-              type="button"
-              onClick={() => setMapLayer('street')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
-                mapLayer === 'street'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-700 hover:text-slate-900'
-              }`}
-            >
-              🗺️ সাধারণ মানচিত্র
-            </button>
-          </div>
-
-          {/* GPS Auto-Locate */}
+          {/* GPS Auto-Locate Button */}
           <button
             type="button"
             onClick={handleCurrentGPS}
             disabled={locating}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-500 border border-sky-400/30 text-white text-xs font-semibold rounded-lg transition-all shadow-sm"
+            className="flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold rounded-xl transition-all shadow-md cursor-pointer self-start sm:self-auto hover:scale-105"
             title="আমার বর্তমান জমিতে জিপিএস পিন করুন"
           >
-            <Navigation className={`w-3.5 h-3.5 ${locating ? 'animate-spin' : ''}`} />
-            <span>{locating ? 'জিপিএস খোঁজা হচ্ছে...' : 'আমার বর্তমান জমি'}</span>
+            <Crosshair className={`w-4 h-4 ${locating ? 'animate-spin' : ''}`} />
+            <span>{locating ? 'জিপিএস খোঁজা হচ্ছে...' : 'আমার বর্তমান জমি (GPS)'}</span>
           </button>
+        </div>
+
+        {/* Dropdowns + Search Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+          {/* District Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedDistrict}
+              onChange={(e) => handleDistrictChange(e.target.value)}
+              className="w-full bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400 appearance-none font-medium cursor-pointer"
+            >
+              <option value="" className="text-slate-800">১. জেলা নির্বাচন করুন...</option>
+              {districtList.map((dist) => (
+                <option key={dist} value={dist} className="text-slate-900">
+                  {dist}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-white/60 absolute right-3 top-2.5 pointer-events-none" />
+          </div>
+
+          {/* Upazila Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedUpazila}
+              onChange={(e) => handleUpazilaChange(e.target.value)}
+              disabled={!selectedDistrict}
+              className="w-full bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400 appearance-none font-medium disabled:opacity-50 cursor-pointer"
+            >
+              <option value="" className="text-slate-800">২. উপজেলা নির্বাচন করুন...</option>
+              {upazilaList.map((upa) => (
+                <option key={upa} value={upa} className="text-slate-900">
+                  {upa}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-white/60 absolute right-3 top-2.5 pointer-events-none" />
+          </div>
+
+          {/* Search Box */}
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-1.5">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="অথবা এলাকার নাম লিখুন..."
+              className="flex-1 bg-white/10 backdrop-blur-md text-white placeholder-emerald-200/60 border border-white/20 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            />
+            <button
+              type="submit"
+              className="p-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-colors cursor-pointer"
+              title="খুঁজুন"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </form>
         </div>
       </div>
 
-      {/* Drawing Mode Toolbar (Only when adding/editing or user wants to draw) */}
-      <div className="bg-slate-100/90 px-4 py-2 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+      {/* 2. Map Mode Toolbar (Pin vs Polygon) & Layer Switcher */}
+      <div className="bg-slate-100/90 px-3 sm:px-4 py-2 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center space-x-2">
-          <span className="text-slate-600 font-medium">চিহ্নিত করার মোড:</span>
+          <span className="text-slate-600 font-bold">নির্বাচন পদ্ধতি:</span>
+          
           <button
             type="button"
             onClick={() => setDrawMode('pin')}
-            className={`px-3 py-1 rounded-md font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               drawMode === 'pin'
-                ? 'bg-amber-100 border border-amber-300 text-amber-900 shadow-sm'
+                ? 'bg-emerald-600 text-white shadow-sm'
                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <MapPin className="w-3.5 h-3.5" />
-            <span>১-ক্লিকে জমিতে পিন ফেলুন</span>
+            <span>১-ক্লিকে জমিতে পিন দিন</span>
           </button>
+
           <button
             type="button"
             onClick={() => setDrawMode('polygon')}
-            className={`px-3 py-1 rounded-md font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               drawMode === 'polygon'
-                ? 'bg-sky-100 border border-sky-300 text-sky-900 shadow-sm'
+                ? 'bg-sky-600 text-white shadow-sm'
                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
             }`}
           >
@@ -349,42 +439,64 @@ export const FarmPlotSatelliteMap = ({
           </button>
         </div>
 
-        {/* Clear drawing if polygon points exist */}
-        {polygonPoints.length > 0 && (
-          <div className="flex items-center space-x-2">
-            <span className="text-sky-700 font-mono text-[11px] font-semibold">
-              {toBanglaDigits(polygonPoints.length)}টি কোণা চিহ্নিত
-            </span>
+        {/* Layer Switcher & Clear Button */}
+        <div className="flex items-center space-x-2">
+          <div className="bg-slate-200/80 p-0.5 rounded-xl border border-slate-300 flex text-[11px]">
+            <button
+              type="button"
+              onClick={() => setMapLayer('google_hybrid')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                mapLayer === 'google_hybrid'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-slate-900'
+              }`}
+            >
+              🛰️ গুগল স্যাটেলাইট
+            </button>
+            <button
+              type="button"
+              onClick={() => setMapLayer('osm')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                mapLayer === 'osm'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-slate-900'
+              }`}
+            >
+              🗺️ সাধারণ মানচিত্র
+            </button>
+          </div>
+
+          {polygonPoints.length > 0 && (
             <button
               type="button"
               onClick={clearDrawing}
-              className="text-rose-600 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded border border-rose-200 flex items-center gap-1 text-[11px]"
+              className="text-rose-600 hover:text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 flex items-center gap-1 text-[11px] font-bold cursor-pointer"
             >
-              <Trash2 className="w-3 h-3" />
-              <span>মুছে পুনরায় দাগ দিন</span>
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>মুছুন</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Leaflet Map Body */}
-      <div className="relative w-full h-[380px] sm:h-[440px]">
+      {/* 3. Interactive Leaflet Map Body */}
+      <div className="relative w-full h-[400px] sm:h-[460px]">
         <MapContainer
           center={centerPin}
-          zoom={15}
+          zoom={targetZoom}
           scrollWheelZoom={true}
           className="w-full h-full z-0"
         >
-          {/* Tile Layer: Esri World Imagery (Satellite) vs OpenStreetMap */}
-          {mapLayer === 'satellite' ? (
+          {/* Hybrid Google Satellite Layer: Crisp satellite images WITH roads, rivers & Bengali village labels! */}
+          {mapLayer === 'google_hybrid' ? (
             <TileLayer
-              attribution='&copy; <a href="https://www.esri.com/">Esri</a> & NASA Landsat'
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              maxZoom={19}
+              attribution='&copy; Google Satellite Hybrid'
+              url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+              maxZoom={20}
             />
           ) : (
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              attribution='&copy; OpenStreetMap'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               maxZoom={19}
             />
@@ -393,9 +505,9 @@ export const FarmPlotSatelliteMap = ({
           {/* Active Center Pin */}
           {centerPin && (
             <Marker position={centerPin} icon={selectedIcon}>
-              <Popup>
+              <Popup autoPan={false}>
                 <div className="text-xs p-1">
-                  <p className="font-bold text-slate-900">📍 আপনার নির্বাচিত জমির কেন্দ্র</p>
+                  <p className="font-bold text-slate-900">📍 আপনার নির্বাচিত জমি</p>
                   <p className="text-slate-600 font-mono mt-0.5">
                     অক্ষাংশ: {centerPin[0].toFixed(5)}, দ্রাঘিমাংশ: {centerPin[1].toFixed(5)}
                   </p>
@@ -421,18 +533,17 @@ export const FarmPlotSatelliteMap = ({
             />
           )}
 
-          {/* Render Polygon Vertices for clear farmer feedback */}
+          {/* Polygon Vertices */}
           {drawMode === 'polygon' && polygonPoints.map((pt, idx) => (
             <Marker key={`vert-${idx}`} position={pt} icon={vertexIcon}>
               <Popup>
-                <div className="text-xs">কোণা #{toBanglaDigits(idx + 1)}</div>
+                <div className="text-xs font-bold">কোণা #{toBanglaDigits(idx + 1)}</div>
               </Popup>
             </Marker>
           ))}
 
-          {/* Render other existing saved plots on map */}
+          {/* Render existing saved plots */}
           {existingPlots.map((plot) => {
-            // Check if plot has polygon GeoJSON or center coords
             let plotPolygon = null;
             let plotCenter = null;
 
@@ -446,11 +557,10 @@ export const FarmPlotSatelliteMap = ({
                   plotCenter = parsed.center;
                 }
               } catch (e) {
-                // Ignore parse errors
+                // Ignore
               }
             }
 
-            // Fallback default coordinates around initialCenter if none specified
             if (!plotCenter) {
               plotCenter = [24.7471 + (plot.id * 0.003), 90.4203 + (plot.id * 0.003)];
             }
@@ -500,25 +610,25 @@ export const FarmPlotSatelliteMap = ({
             onPlotCoordinatesChange={handleCoordinatesChange}
           />
 
-          <MapCenterFlyer center={centerPin} />
+          <MapCenterFlyer center={targetCenter} zoom={targetZoom} />
         </MapContainer>
 
         {/* Live Farm Overlay Card on Map */}
-        <div className="absolute bottom-3 left-3 right-3 sm:right-auto sm:max-w-md z-[1000] bg-white/95 backdrop-blur-md p-3.5 rounded-xl border border-slate-200 shadow-xl">
+        <div className="absolute bottom-3 left-3 right-3 sm:right-auto sm:max-w-md z-[1000] bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200 shadow-xl">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center space-x-1.5 text-emerald-700 font-bold text-xs">
                 <Compass className="w-4 h-4 text-emerald-600" />
-                <span>জমির রিয়েল-টাইম কোঅর্ডিনেট</span>
+                <span>নির্বাচিত জমির অবস্থান ও কোঅর্ডিনেট</span>
               </div>
               <p className="text-slate-800 font-mono text-[11px] mt-1">
-                অক্ষাংশ (Lat): <b className="text-emerald-700">{centerPin[0]?.toFixed(5)}</b> | দ্রাঘিমাংশ (Lon): <b className="text-emerald-700">{centerPin[1]?.toFixed(5)}</b>
+                অক্ষাংশ: <b className="text-emerald-700">{centerPin[0]?.toFixed(5)}° N</b> | দ্রাঘিমাংশ: <b className="text-emerald-700">{centerPin[1]?.toFixed(5)}° E</b>
               </p>
             </div>
 
             {calculatedArea && (
-              <div className="text-right bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-                <span className="text-[10px] text-emerald-700 block font-medium">পরিমাপকৃত মোট জমি</span>
+              <div className="text-right bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+                <span className="text-[10px] text-emerald-700 block font-medium">পরিমাপকৃত জমি</span>
                 <span className="text-xs font-bold text-emerald-800">
                   {toBanglaDigits(calculatedArea.bigha)} বিঘা ({toBanglaDigits(calculatedArea.decimal)} শতক)
                 </span>
@@ -527,13 +637,13 @@ export const FarmPlotSatelliteMap = ({
           </div>
 
           <div className="mt-2 text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-200/80 pt-1.5">
-            <span>
+            <span className="text-slate-700 font-medium">
               {drawMode === 'polygon'
                 ? '👉 জমির সীমানার প্রতিটি কোণায় ক্লিক করে দাগ দিন'
-                : '👉 ম্যাপে নিজের জমির ওপর ক্লিক করে পিন বসান'}
+                : '👉 ম্যাপে নিজের জমির ওপর ক্লিক করে পিন ফেলুন'}
             </span>
-            <span className="text-emerald-600 font-medium">
-              ✓ NASA টেলিমিত্রি সিঙ্কড
+            <span className="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              ✓ লাইভ সিঙ্ক
             </span>
           </div>
         </div>

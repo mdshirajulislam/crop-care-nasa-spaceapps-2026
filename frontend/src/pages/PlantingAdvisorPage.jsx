@@ -10,8 +10,8 @@ import {
   XAxis, YAxis, Tooltip, Legend, CartesianGrid, ReferenceDot 
 } from 'recharts';
 import { AudioSpeakerButton } from '../components/AudioSpeakerButton';
-import { toBanglaDigits } from '../utils/banglaNumbers';
 import { useLanguage } from '../contexts/LanguageContext';
+import { CropCareAdvisoryModal } from '../components/CropCareAdvisoryModal';
 
 export const PlantingAdvisorPage = () => {
   const { lang, t } = useLanguage();
@@ -23,6 +23,7 @@ export const PlantingAdvisorPage = () => {
   const [farmerProfile, setFarmerProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updatingDate, setUpdatingDate] = useState(false);
+  const [careModalOpen, setCareModalOpen] = useState(false);
 
   // Default optimal dates per crop
   const defaultDates = {
@@ -141,7 +142,15 @@ export const PlantingAdvisorPage = () => {
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5 flex-wrap gap-y-2">
+          <button
+            onClick={() => setCareModalOpen(true)}
+            className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-700/20 transition-all border border-emerald-500 cursor-pointer hover:scale-[1.01]"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-200" />
+            <span>{lang === 'bn' ? 'সার ও স্প্রে পরিচর্যা ক্যালেন্ডার' : 'Care & Spray Schedule'}</span>
+          </button>
+
           {adviceData?.best_window?.rationale_bn && (
             <AudioSpeakerButton 
               text={lang === 'bn' 
@@ -561,6 +570,28 @@ export const PlantingAdvisorPage = () => {
             </div>
           </div>
 
+          {/* Fertilizer & Spray Care CTA Banner */}
+          <div className="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-2xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg border border-emerald-700">
+            <div className="space-y-1">
+              <h3 className="text-base sm:text-lg font-bold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-emerald-300" />
+                <span>{lang === 'bn' ? 'এই ফসলের সার ও স্প্রে করার দিনভিত্তিক সময়সূচী প্রয়োজন?' : 'Need Day-by-Day Spray & Fertilizer Schedule?'}</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+                {lang === 'bn' 
+                  ? 'আপনার জমির পরিমাণ ও মাটির ধরন অনুযায়ী কখন কোন সার কত কেজি দিতে হবে এবং কোন রোগের জন্য কোন স্প্রে করতে হবে তা জানুন।' 
+                  : 'Get calculated fertilizer doses and pest spray recommendations scaled to your exact land area.'}
+              </p>
+            </div>
+            <button
+              onClick={() => setCareModalOpen(true)}
+              className="px-5 py-2.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 text-xs sm:text-sm font-bold shadow-md transition-all flex items-center space-x-1.5 flex-shrink-0 cursor-pointer self-start sm:self-auto hover:scale-105"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <span>{lang === 'bn' ? 'পূর্ণাঙ্গ শিডিউল দেখুন' : 'Open Care Schedule'}</span>
+            </button>
+          </div>
+
           {/* Fertilizer Schedule */}
           {adviceData.fertilizer_plan && adviceData.fertilizer_plan.length > 0 && (
             <div className="glass-card rounded-2xl p-5 border border-slate-200 bg-white space-y-3 shadow-sm">
@@ -584,6 +615,20 @@ export const PlantingAdvisorPage = () => {
           )}
         </>
       )}
+
+      {/* Crop Care & Spray Advisory Modal */}
+      <CropCareAdvisoryModal
+        isOpen={careModalOpen}
+        onClose={() => setCareModalOpen(false)}
+        initialPlot={{
+          name: `প্লট - ${crops.find(c => c.id === selectedCrop)?.name_bn || selectedCrop}`,
+          crop_name: crops.find(c => c.id === selectedCrop)?.name_bn || selectedCrop,
+          planting_date: plantingDate,
+          area_value: 2.5,
+          area_unit: 'bigha',
+          soil_type: 'দোআঁশ মাটি'
+        }}
+      />
     </div>
   );
 };

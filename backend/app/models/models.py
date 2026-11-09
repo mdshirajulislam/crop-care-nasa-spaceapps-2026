@@ -43,6 +43,7 @@ class Plot(Base):
     current_stage = Column(String(50), default="কুশি গজানো পর্যায় (Tillering Stage)")
     health_status = Column(String(50), default="ভালো (Good)")
     ndvi_score = Column(Float, default=0.68)
+    completed_tasks = Column(Text, default="[]") # JSON list of completed task IDs
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="plots")

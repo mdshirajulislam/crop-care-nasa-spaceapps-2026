@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { fetchPlots, addPlot, updatePlot, deletePlot, fetchProfile } from '../utils/api';
 import { 
   MapPin, Plus, Trash2, Edit3, Check, Sprout, ArrowRightLeft, 
-  Droplet, Shield, X, Loader2, Satellite, Compass, Sparkles, Layers
+  Droplet, Shield, X, Loader2, Satellite, Compass, Sparkles, Layers, ChevronRight
 } from 'lucide-react';
 import { toBanglaDigits, formatLandArea } from '../utils/banglaNumbers';
-import { useLanguage } from '../contexts/LanguageContext';
 import { FarmPlotSatelliteMap } from '../components/FarmPlotSatelliteMap';
+import { CropCareAdvisoryModal } from '../components/CropCareAdvisoryModal';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const LandManagementPage = () => {
   const { lang, t } = useLanguage();
@@ -18,6 +19,8 @@ export const LandManagementPage = () => {
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingPlot, setEditingPlot] = useState(null);
+  const [careModalOpen, setCareModalOpen] = useState(false);
+  const [advisoryPlot, setAdvisoryPlot] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -209,13 +212,26 @@ export const LandManagementPage = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-700/20 transition-all self-start sm:self-auto border border-emerald-500"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{t.lands.addNewPlot}</span>
-        </button>
+        <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+          <button
+            onClick={() => {
+              setAdvisoryPlot(null);
+              setCareModalOpen(true);
+            }}
+            className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-700/20 transition-all border border-emerald-500 cursor-pointer hover:scale-[1.01]"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-200" />
+            <span>{lang === 'bn' ? 'ফসলের পরিচর্যা ও স্প্রে পরামর্শ' : 'Crop Care & Spray Advisor'}</span>
+          </button>
+
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-md transition-all border border-slate-700 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{t.lands.addNewPlot}</span>
+          </button>
+        </div>
       </div>
 
       {/* Primary Satellite Map Section showing ALL farmer plots */}
@@ -336,6 +352,21 @@ export const LandManagementPage = () => {
                     </strong>
                   </div>
                 </div>
+
+                {/* View Crop Advisory & Spray Calendar Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAdvisoryPlot(p);
+                    setCareModalOpen(true);
+                  }}
+                  className="w-full mt-3 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center justify-center space-x-1.5 transition-all shadow-2xs hover:shadow-xs cursor-pointer group-hover:border-emerald-300"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{lang === 'bn' ? 'সার ও স্প্রে পরিচর্যা সময়সূচী দেখুন' : 'View Care & Spray Schedule'}</span>
+                  <ChevronRight className="w-3.5 h-3.5 ml-auto text-emerald-600" />
+                </button>
               </div>
             );
           })}
@@ -571,6 +602,17 @@ export const LandManagementPage = () => {
           </div>
         </div>
       )}
+
+      {/* Crop Care & Spray Advisory Modal */}
+      <CropCareAdvisoryModal
+        isOpen={careModalOpen}
+        onClose={() => {
+          setCareModalOpen(false);
+          setAdvisoryPlot(null);
+        }}
+        initialPlot={advisoryPlot}
+        onPlotSaved={() => loadPlots()}
+      />
     </div>
   );
 };

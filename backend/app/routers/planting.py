@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query
 from app.services.planting_advisor import PlantingAdvisorService
+from app.services.crop_care_advisor import CropCareAdvisorService
 from typing import Optional
 
 router = APIRouter(prefix="/planting", tags=["Planting Advisor"])
@@ -12,6 +13,10 @@ def get_available_crops():
         for k, v in calendar.items()
     ]
 
+@router.get("/supported-care-crops")
+def get_supported_care_crops():
+    return CropCareAdvisorService.get_supported_crops()
+
 @router.get("/advisor")
 def get_advisor(
     crop_id: str = Query("aman_rice", description="Crop ID"),
@@ -19,3 +24,4 @@ def get_advisor(
 ):
     advice = PlantingAdvisorService.get_planting_advice(crop_id, planting_date)
     return advice
+

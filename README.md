@@ -94,45 +94,57 @@ Crop Care directly taps into NASA Earth Data APIs and remote sensing products:
 |---|---|---|
 | **NASA POWER Agroclimatology** | LaRC POWER API (`PRECTOTCORR`, `T2M`, `ALLSKY_SFC_SW_DWN`) | 20+ year baseline analysis of rainfall, solar radiation, and temperature for climate-resilient sowing windows. |
 | **NASA SMAP** | Soil Moisture Active Passive (`GWETTOP` / Root-zone) | Precision irrigation scheduling, calculating water deficit vs. soil wetness to conserve groundwater and pump diesel costs. |
+| **NASA ECOSTRESS** | ISS Thermal Radiometer (`LST` Canopy Temperature vs Air $T_{canopy} - T_{air}$) | Detects hidden plant thirst, transpiration rate, and plant thermal stress ("গাছের জ্বর") before visual leaf wilting occurs. |
 | **NASA GIBS WMTS** | Global Imagery Browse Services (MODIS / VIIRS NDVI) | Near real-time satellite imagery layer for vegetation vigour inspection and weak crop health zones. |
-| **NASA GPM / IMERG** | Global Precipitation Measurement (Runoff / Upstream) | Flash flood early warning systems for river basins and low-lying Haor districts. |
+| **NASA GPM / IMERG & POWER** | Precipitation Runoff & Convective Instability | 7-day upstream Haor flash-flood early warning, Nor'wester/Hailstorm risk index, and BRRI emergency harvest calculator. |
 | **NASA Parametric Proof** | Earth Data Time-Series Validation | Automated climate hazard event verification reports for financial institutions & crop insurance claims. |
 
 ---
 
 ## ✨ Key Features & Innovations
 
-### 1. 🌦️ Unified Agro-Weather & Smart Spray Shield
+### 1. 🌡️ NASA ECOSTRESS Plant Thermal Stress & Hidden Thirst Detector
+- Uses NASA ECOSTRESS Land Surface Temperature (LST) and ambient 2-meter air temperature ($T2M$) to calculate $\Delta T = T_{canopy} - T_{air}$.
+- Detects stomatal closure, evapotranspiration loss %, and "Plant Fever" up to 48 hours before physical leaf yellowing or wilting.
+- Provides immediate hydration and irrigation recovery recommendations.
+
+### 2. ⚡ NASA GPM & Convective Flash Flood & Hailstorm Shield (BRRI Model)
+- Monitors upstream torrential precipitation in northeastern Meghalaya/Assam catchments using NASA GPM IMERG.
+- Features a **Nor'wester (কালবৈশাখী) & Hailstorm Risk Index** based on atmospheric convective potential energy and high-velocity wind gusts (~48–68 km/h).
+- **Interactive Emergency Harvest Decision Window**: Farmers adjust a crop maturity slider (50%–100%) to calculate net financial salvage value vs. potential flood loss based on BRRI physiological maturity benchmarks (80% ripe grain secures 95% full yield).
+
+### 3. 🎙️ Edge-TTS Microsoft Neural Bengali Voice AI Assistant
+- Powered by real-time streaming Microsoft Edge Neural TTS with authentic human Bengali voices:
+  - 👨‍🌾 **Pradeep** (`bn-BD-PradeepNeural` - Male)
+  - 👩‍🌾 **Nabanita** (`bn-BD-NabanitaNeural` - Female)
+- Comprehensive local agro-intelligence brain referencing BRRI and BARI research databases for pests, fertilizers, and AWD water-saving schedules.
+- Full two-way conversational voice dialogue with Web Speech recognition (`bn-BD`).
+
+### 4. 🗺️ GPS Plot Boundary & 64 Districts Land Management
+- Instant search and dropdown navigation across all 64 districts and upazilas of Bangladesh.
+- Google Hybrid satellite tiles with Bengali and English locality labels.
+- Interactive Leaflet polygon drawing to measure area in Bigha and Shatak.
+
+### 5. 🌦️ Unified Agro-Weather & Smart Spray Shield
 - Real-time 7-day hyperlocal forecast combined with **NASA Climatology anomalies**.
 - **Automated Spray Advisory**: Calculates rain probability within 4–6 hours, wind speed thresholds, and leaf moisture to warn farmers against premature pesticide application.
-- Correct native Bengali calendar and localized weekday mappings.
 
-### 2. 🌱 NASA Climatology-Powered Planting Advisor
+### 6. 🌱 NASA Climatology-Powered Planting Advisor
 - Compares current environmental parameters against 20-year climatological distributions.
 - Determines the **ideal planting window**, warning farmers of post-sowing drought stress or monsoon waterlogging.
 
-### 3. 💧 Smart Irrigation & Diesel Saving Scheduler (NASA SMAP)
+### 7. 💧 Smart Irrigation & Diesel Saving Scheduler (NASA SMAP)
 - Analyzes root-zone soil moisture metrics to recommend exact irrigation depth and hours.
 - Estimates diesel fuel and electricity cost savings per Bigha.
 
-### 4. 🌊 Haor & Upstream Flash Flood Early Warning (GPM IMERG)
-- Monitors upstream torrential precipitation in northeastern catchments to provide 7-day flash-flood runoff advisories for Boro and Aman rice growers.
-
-### 5. 🔬 Crop Doctor & AI Disease Diagnosis
+### 8. 🔬 Crop Doctor & AI Disease Diagnosis
 - Leaf photograph analysis powered by vision AI.
 - Prioritizes **eco-friendly & biological treatments** before chemical pesticides.
 - Displays chemical generic formulations, proper dosages, Pre-Harvest Intervals (PHI), and cost calculations per Bigha.
 
-### 6. 📜 Parametric Climate Loss Certificate
+### 9. 📜 Parametric Climate Loss Certificate
 - Instant generation of tamper-evident loss proof for bank loans and crop insurance.
 - Correlates reported field damage with NASA historical precipitation, heat index, and storm anomalies.
-
-### 7. 🗣️ Accessibility-First Bangla Voice Assistant
-- Native Text-to-Speech (TTS) readout for every advisory card.
-- Speech-to-Text (STT) voice input and AI conversational agent tailored for dialect understanding.
-
-### 8. 🗺️ NASA GIBS Interactive Plot Health Map
-- Interactive geospatial plot boundaries (GeoJSON polygon tracking) rendered on Leaflet with NDVI vegetation overlay.
 
 ---
 

@@ -54,6 +54,38 @@ export const deletePlot = async (id) => {
   return res.json();
 };
 
+export const calculateCropAdvisory = async (data) => {
+  const res = await fetch(`${API_BASE}/plots/calculate-advisory`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Calculate crop advisory error');
+  return res.json();
+};
+
+export const fetchPlotAdvisory = async (plotId) => {
+  const res = await fetch(`${API_BASE}/plots/${plotId}/advisory`);
+  if (!res.ok) throw new Error('Fetch plot advisory error');
+  return res.json();
+};
+
+export const togglePlotTask = async (plotId, taskId, completed) => {
+  const res = await fetch(`${API_BASE}/plots/${plotId}/toggle-task`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ task_id: taskId, completed })
+  });
+  if (!res.ok) throw new Error('Toggle plot task error');
+  return res.json();
+};
+
+export const fetchSupportedCareCrops = async () => {
+  const res = await fetch(`${API_BASE}/planting/supported-care-crops`);
+  if (!res.ok) throw new Error('Supported care crops API error');
+  return res.json();
+};
+
 // --- Planting Advisor ---
 export const fetchPlantingAdvice = async (cropId = 'aman_rice', plantingDate = null) => {
   const url = plantingDate 
@@ -271,4 +303,35 @@ export const fetchPestRadar = async () => {
   if (!res.ok) throw new Error('Pest radar error');
   return res.json();
 };
+
+export const fetchThermalStress = async (cropType = 'aman_rice', landBigha = 3.5, lat = null, lon = null) => {
+  let url = `${API_BASE}/nasa-features/thermal-stress?crop_type=${cropType}&land_bigha=${landBigha}`;
+  if (lat !== null && lon !== null && lat !== undefined && lon !== undefined) {
+    url += `&lat=${lat}&lon=${lon}`;
+  }
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Thermal stress API error');
+  return res.json();
+};
+
+export const askVoiceAgent = async (data) => {
+  const res = await fetch(`${API_BASE}/chat/voice-agent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Voice agent API error');
+  return res.json();
+};
+
+export const calculateEmergencyHarvest = async (data) => {
+  const res = await fetch(`${API_BASE}/nasa-features/emergency-harvest-calculator`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Harvest calculator error');
+  return res.json();
+};
+
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPin, Navigation, Compass, CheckCircle2, Crosshair } from 'lucide-react';
+import { MapPin, Navigation, Compass, CheckCircle2, Crosshair, Search, ChevronDown } from 'lucide-react';
 import { toBanglaDigits } from '../utils/banglaNumbers';
+import { DISTRICTS_DATA, parseBangladeshAddress } from '../utils/bangladeshGeoData';
 
 // Custom Map Marker Icon
 const customMarkerIcon = new L.Icon({
@@ -21,11 +22,11 @@ function LocationMarker({ position, setPosition, onLocationChange, locationTitle
 
   useMapEvents({
     click(e) {
-      const newPos = [e.latlng.lat, e.latlng.lng];
+      const newPos = [parseFloat(e.latlng.lat.toFixed(5)), parseFloat(e.latlng.lng.toFixed(5))];
       setPosition(newPos);
-      map.flyTo(newPos, 15, { duration: 0.8 });
+      map.flyTo(newPos, map.getZoom(), { duration: 0.8 });
       if (onLocationChange) {
-        onLocationChange(e.latlng.lat, e.latlng.lng);
+        onLocationChange(newPos[0], newPos[1]);
       }
     },
   });
@@ -77,19 +78,33 @@ export const InteractiveLocationPicker = ({
   locationTitle = ""
 }) => {
   const [position, setPosition] = useState([initialLat, initialLon]);
-  const [mapLayer, setMapLayer] = useState('satellite'); // 'satellite', 'street'
+  const [targetCenter, setTargetCenter] = useState([initialLat, initialLon]);
+  const [targetZoom, setTargetZoom] = useState(15);
+  const [mapLayer, setMapLayer] = useState('google_hybrid'); // 'google_hybrid', 'street'
   const [locating, setLocating] = useState(false);
+
+  // Quick District / Upazila Jumper State
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedUpazila, setSelectedUpazila] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const districtList = Object.keys(DISTRICTS_DATA).sort();
+  const upazilaList = selectedDistrict && DISTRICTS_DATA[selectedDistrict]?.upazilas 
+    ? Object.keys(DISTRICTS_DATA[selectedDistrict].upazilas).sort() 
+    : [];
 
   // Sync position whenever initialLat or initialLon changes externally
   useEffect(() => {
     if (initialLat && initialLon) {
-      setPosition([parseFloat(Number(initialLat).toFixed(5)), parseFloat(Number(initialLon).toFixed(5))]);
+      const newPos = [parseFloat(Number(initialLat).toFixed(5)), parseFloat(Number(initialLon).toFixed(5))];
+      setPosition(newPos);
+      setTargetCenter(newPos);
     }
   }, [initialLat, initialLon]);
 
   const handleCurrentGPS = () => {
     if (!navigator.geolocation) {
-      alert("আপনার ব্রাউজারে জিপিএস সুবিধা নেই।");
+      alert("আপনার ব্রাউজারে জিপিএস সুবিধা নেই। উপরের জেলা ও উপজেলা সিলেক্ট করে আপনার এলাকায় যান।");
       return;
     }
     setLocating(true);
@@ -100,6 +115,8 @@ export const InteractiveLocationPicker = ({
           parseFloat(pos.coords.longitude.toFixed(5))
         ];
         setPosition(coords);
+        setTargetCenter(coords);
+        setTargetZoom(16);
         if (onLocationSelect) {
           onLocationSelect(coords[0], coords[1]);
         }
@@ -108,59 +125,152 @@ export const InteractiveLocationPicker = ({
       (err) => {
         console.error("GPS error:", err);
         setLocating(false);
-        alert("জিপিএস লোকেশন নেওয়া সম্ভব হয়নি। অনুগ্রহ করে মানচিত্রে সরাসরি ক্লিক করে নির্বাচন করুন।");
+        alert("জিপিএস লোকেশন পাওয়া যায়নি। অনুগ্রহ করে উপরের জেলা ও উপজেলা ড্রপডাউন থেকে নির্বাচন করুন।");
       },
       { timeout: 8000 }
     );
   };
 
+  const handleDistrictChange = (dist) => {
+    setSelectedDistrict(dist);
+    setSelectedUpazila('');
+    if (dist && DISTRICTS_DATA[dist]) {
+      const d = DISTRICTS_DATA[dist];
+      const newPos = [d.lat, d.lon];
+      setTargetCenter(newPos);
+      setPosition(newPos);
+      setTargetZoom(13);
+      if (onLocationSelect) onLocationSelect(newPos[0], newPos[1]);
+    }
+  };
+
+  const handleUpazilaChange = (upa) => {
+    setSelectedUpazila(upa);
+    if (selectedDistrict && upa && DISTRICTS_DATA[selectedDistrict]?.upazilas?.[upa]) {
+      const u = DISTRICTS_DATA[selectedDistrict].upazilas[upa];
+      const newPos = [u.lat, u.lon];
+      setTargetCenter(newPos);
+      setPosition(newPos);
+      setTargetZoom(15);
+      if (onLocationSelect) onLocationSelect(newPos[0], newPos[1]);
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    const parsed = parseBangladeshAddress(searchQuery);
+    if (parsed && parsed.lat && parsed.lon) {
+      const newPos = [parsed.lat, parsed.lon];
+      setTargetCenter(newPos);
+      setPosition(newPos);
+      setTargetZoom(16);
+      if (parsed.district) setSelectedDistrict(parsed.district);
+      if (parsed.upazila) setSelectedUpazila(parsed.upazila);
+      if (onLocationSelect) onLocationSelect(newPos[0], newPos[1]);
+    } else {
+      alert("এলাকা খুঁজে পাওয়া যায়নি। অনুগ্রহ করে জেলা ও উপজেলা নির্বাচন করুন।");
+    }
+  };
+
   return (
     <div className="space-y-3">
-      {/* Map Controls Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center space-x-2 text-xs font-semibold text-slate-700">
-          <MapPin className="w-4 h-4 text-emerald-600" />
-          <span>
-            {locationTitle ? (
-              <span>মানচিত্রে চিহ্নিত অবস্থান: <strong className="text-emerald-800">{locationTitle}</strong></span>
-            ) : (
-              <span>মানচিত্রে আপনার খামার / বাড়ির অবস্থান চিহ্নিত করুন:</span>
-            )}
-          </span>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {/* Map Layer Switcher */}
-          <div className="flex bg-slate-100 rounded-xl p-0.5 border border-slate-300 text-[11px]">
-            <button
-              type="button"
-              onClick={() => setMapLayer('satellite')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                mapLayer === 'satellite' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              স্যাটেলাইট
-            </button>
-            <button
-              type="button"
-              onClick={() => setMapLayer('street')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                mapLayer === 'street' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              রাস্তাঘাট
-            </button>
+      {/* Location Jumper Header */}
+      <div className="bg-gradient-to-r from-emerald-800 to-slate-900 rounded-2xl p-3 text-white space-y-2.5">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center space-x-2 text-xs font-bold text-emerald-200">
+            <MapPin className="w-4 h-4 text-emerald-400" />
+            <span>
+              {locationTitle ? (
+                <span>অবস্থান: <strong className="text-white">{locationTitle}</strong></span>
+              ) : (
+                <span>মানচিত্রে আপনার খামার / বাড়ির অবস্থান চিহ্নিত করুন:</span>
+              )}
+            </span>
           </div>
 
-          {/* GPS Locate Button */}
           <button
             type="button"
             onClick={handleCurrentGPS}
             disabled={locating}
-            className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-emerald-700 text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
+            className="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
           >
             <Crosshair className={`w-3.5 h-3.5 ${locating ? 'animate-spin' : ''}`} />
-            <span>{locating ? 'খোঁজা হচ্ছে...' : 'বর্তমান GPS'}</span>
+            <span>{locating ? 'খোঁজা হচ্ছে...' : 'আমার বর্তমান GPS'}</span>
+          </button>
+        </div>
+
+        {/* District, Upazila & Search Inputs */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+          <div className="relative">
+            <select
+              value={selectedDistrict}
+              onChange={(e) => handleDistrictChange(e.target.value)}
+              className="w-full bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl px-2.5 py-1.5 focus:outline-none appearance-none cursor-pointer"
+            >
+              <option value="" className="text-slate-800">১. জেলা নির্বাচন করুন...</option>
+              {districtList.map((d) => (
+                <option key={d} value={d} className="text-slate-900">{d}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-white/60 absolute right-2.5 top-2 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <select
+              value={selectedUpazila}
+              onChange={(e) => handleUpazilaChange(e.target.value)}
+              disabled={!selectedDistrict}
+              className="w-full bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl px-2.5 py-1.5 focus:outline-none appearance-none disabled:opacity-50 cursor-pointer"
+            >
+              <option value="" className="text-slate-800">২. উপজেলা নির্বাচন করুন...</option>
+              {upazilaList.map((u) => (
+                <option key={u} value={u} className="text-slate-900">{u}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-white/60 absolute right-2.5 top-2 pointer-events-none" />
+          </div>
+
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-1">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="অথবা এলাকা লিখুন..."
+              className="flex-1 bg-white/10 backdrop-blur-md text-white placeholder-emerald-200/60 border border-white/20 rounded-xl px-2.5 py-1.5 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="p-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold"
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Map Layer Switcher Header */}
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[11px] text-slate-500">👉 ম্যাপে নিজের জমির ওপর ক্লিক করে সঠিক লোকেশন চিহ্নিত করুন</span>
+        <div className="flex bg-slate-100 rounded-xl p-0.5 border border-slate-300 text-[11px]">
+          <button
+            type="button"
+            onClick={() => setMapLayer('google_hybrid')}
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+              mapLayer === 'google_hybrid' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            🛰️ গুগল স্যাটেলাইট
+          </button>
+          <button
+            type="button"
+            onClick={() => setMapLayer('street')}
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+              mapLayer === 'street' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            🗺️ সাধারণ মানচিত্র
           </button>
         </div>
       </div>
@@ -169,20 +279,22 @@ export const InteractiveLocationPicker = ({
       <div className="w-full h-72 sm:h-80 rounded-2xl overflow-hidden border border-slate-300 shadow-sm relative z-10">
         <MapContainer
           center={position}
-          zoom={15}
+          zoom={targetZoom}
           style={{ height: '100%', width: '100%' }}
           scrollWheelZoom={true}
         >
-          <MapController center={position} zoom={15} />
-          {mapLayer === 'satellite' ? (
+          <MapController center={targetCenter} zoom={targetZoom} />
+          {mapLayer === 'google_hybrid' ? (
             <TileLayer
-              attribution='&copy; Google Satellite / Esri'
+              attribution='&copy; Google Satellite Hybrid'
               url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+              maxZoom={20}
             />
           ) : (
             <TileLayer
               attribution='&copy; OpenStreetMap'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maxZoom={19}
             />
           )}
           <LocationMarker

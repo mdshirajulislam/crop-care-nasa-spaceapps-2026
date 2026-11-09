@@ -11,10 +11,12 @@ import { MedicineGuidePage } from './pages/MedicineGuidePage';
 import { ExpertChatPage } from './pages/ExpertChatPage';
 import { LandManagementPage } from './pages/LandManagementPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { MessageSquareQuote, Sparkles } from 'lucide-react';
+import { VoiceAgroAssistantModal } from './components/VoiceAgroAssistantModal';
+import { Mic, Sparkles } from 'lucide-react';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
   const { lang, t } = useLanguage();
 
   const renderActivePage = () => {
@@ -53,19 +55,23 @@ function AppContent() {
         {renderActivePage()}
       </main>
 
-      {/* Floating AI Voice Assistant Button */}
-      {activeTab !== 'chat' && (
-        <button
-          onClick={() => setActiveTab('chat')}
-          className="fixed bottom-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 hover:from-purple-500 hover:to-indigo-400 text-white shadow-2xl shadow-purple-900/60 border border-purple-400/40 flex items-center space-x-2 transition-all hover:scale-105 active:scale-95 group"
-          title={lang === 'bn' ? "কৃষি এআই বিশেষজ্ঞের সাথে কথা বলুন" : "Chat with Agro AI Expert"}
-        >
-          <MessageSquareQuote className="w-6 h-6" />
-          <span className="text-xs font-bold pr-1 hidden sm:inline">
-            {lang === 'bn' ? 'কৃষি এআই সহায়তা' : 'Agro AI Assistant'}
-          </span>
-        </button>
-      )}
+      {/* Global Sleek Voice Agro Assistant Floating Action Button */}
+      <button
+        onClick={() => setVoiceModalOpen(true)}
+        className="fixed bottom-6 right-6 z-40 p-4 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white shadow-2xl shadow-purple-900/40 border-2 border-white/80 flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer group"
+        title={lang === 'bn' ? "কৃষি বন্ধুকে মুখে বাংলায় প্রশ্ন করুন" : "Speak to Agro AI Voice Assistant"}
+      >
+        <Mic className="w-6 h-6 animate-pulse" />
+        <span className="text-xs font-bold pr-1 hidden sm:inline">
+          {lang === 'bn' ? 'কৃষি বন্ধু ভয়েস' : 'Voice AI'}
+        </span>
+      </button>
+
+      {/* Global Voice Assistant Modal */}
+      <VoiceAgroAssistantModal
+        isOpen={voiceModalOpen}
+        onClose={() => setVoiceModalOpen(false)}
+      />
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 space-y-1">
