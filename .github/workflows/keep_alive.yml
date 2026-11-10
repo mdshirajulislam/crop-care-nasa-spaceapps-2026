@@ -1,0 +1,21 @@
+name: Keep Crop Care Alive 24/7
+
+on:
+  schedule:
+    # Runs every 10 minutes to prevent Render free instance from spinning down
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  keep_alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Crop Care Server
+        run: |
+          echo "Pinging https://crop-care-nasa-spaceapps-2026.onrender.com..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://crop-care-nasa-spaceapps-2026.onrender.com/)
+          echo "Response HTTP Status: $HTTP_CODE"
+          
+          # Also ping weather API to keep DB warm
+          curl -s -f "https://crop-care-nasa-spaceapps-2026.onrender.com/api/v1/weather/forecast?lat=24.7471&lon=90.4203" > /dev/null
+          echo "Server is active and kept warm!"

@@ -117,6 +117,26 @@ else:
             "docs_url": "/docs"
         }
 
+@app.on_event("startup")
+async def startup_keep_alive():
+    import asyncio
+    async def _ping_loop():
+        await asyncio.sleep(60) # Wait 1 min after startup
+        import urllib.request
+        while True:
+            try:
+                req = urllib.request.Request(
+                    "https://crop-care-nasa-spaceapps-2026.onrender.com/api/v1/weather/forecast?lat=24.7471&lon=90.4203",
+                    headers={"User-Agent": "CropCare-KeepAlive/1.0"}
+                )
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    pass
+            except Exception:
+                pass
+            await asyncio.sleep(600) # Ping every 10 minutes
+    
+    asyncio.create_task(_ping_loop())
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
