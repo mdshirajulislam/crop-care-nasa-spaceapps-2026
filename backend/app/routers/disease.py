@@ -22,24 +22,30 @@ async def diagnose_crop(req: DiagnosisRequest, db: Session = Depends(get_db)):
         disease_id=req.disease_id,
         land_area_bigha=req.land_area_bigha or 3.5
     )
-    # Save record
-    diag_record = DiseaseDiagnosis(
-        crop_name=result["crop_name"],
-        disease_name_bn=result["disease_name_bn"],
-        disease_name_en=result["disease_name_en"],
-        confidence=result["confidence"],
-        severity=result["severity"],
-        symptoms_bn=result["symptoms_bn"],
-        causes_bn=result["causes_bn"],
-        organic_treatment_bn=result["treatment"]["organic_home_remedy"],
-        chemical_treatment_bn=result["treatment"]["chemical_medicine"],
-        dosage_per_bigha=result["treatment"]["dosage_per_bigha"],
-        safety_precautions_bn=result["treatment"]["safety_guideline"],
-        estimated_cost_bdt=result["treatment"]["calculated_cost_for_land"]["total_estimated_bdt"]
-    )
-    db.add(diag_record)
-    db.commit()
-    db.refresh(diag_record)
+    if result.get("is_crop_leaf") is False:
+        return result
+
+    # Save record if valid diagnosis
+    try:
+        diag_record = DiseaseDiagnosis(
+            crop_name=result.get("crop_name", "ফসল"),
+            disease_name_bn=result.get("disease_name_bn", "রোগ"),
+            disease_name_en=result.get("disease_name_en", "Disease"),
+            confidence=result.get("confidence", 0.94),
+            severity=result.get("severity", "মাঝারি"),
+            symptoms_bn=result.get("symptoms_bn", ""),
+            causes_bn=result.get("causes_bn", ""),
+            organic_treatment_bn=result.get("treatment", {}).get("organic_home_remedy", ""),
+            chemical_treatment_bn=result.get("treatment", {}).get("chemical_medicine", ""),
+            dosage_per_bigha=result.get("treatment", {}).get("dosage_per_bigha", ""),
+            safety_precautions_bn=result.get("treatment", {}).get("safety_guideline", ""),
+            estimated_cost_bdt=result.get("treatment", {}).get("calculated_cost_for_land", {}).get("total_estimated_bdt", 350.0)
+        )
+        db.add(diag_record)
+        db.commit()
+        db.refresh(diag_record)
+    except Exception:
+        pass
 
     return result
 
