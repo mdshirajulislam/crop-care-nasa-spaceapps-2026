@@ -65,15 +65,57 @@ for pfx in ["/api/v1", "/api"]:
     app.include_router(satellite.router, prefix=pfx)
     app.include_router(nasa_features.router, prefix=pfx)
 
-@app.get("/")
-def root():
-    return {
-        "app": "Crop Care (কৃষি বন্ধু)",
-        "version": "1.0.0",
-        "description": "NASA Space Apps Challenge 2026 - Production Ready Bangladeshi Farmer Application",
-        "status": "online",
-        "docs_url": "/docs"
-    }
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from fastapi import HTTPException
+
+# Check for static directory (built frontend bundle)
+STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static"))
+if not os.path.exists(STATIC_DIR):
+    STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "static"))
+
+if os.path.exists(STATIC_DIR):
+    assets_dir = os.path.join(STATIC_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/")
+    def serve_root():
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        return {
+            "app": "Crop Care (কৃষি বন্ধু)",
+            "version": "1.0.0",
+            "status": "online"
+        }
+
+    @app.get("/{full_path:path}")
+    def serve_frontend_spa(full_path: str):
+        # Don't intercept API or docs routes
+        if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+            raise HTTPException(status_code=404, detail="Not Found")
+        
+        file_path = os.path.join(STATIC_DIR, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        
+        raise HTTPException(status_code=404, detail="File Not Found")
+else:
+    @app.get("/")
+    def root():
+        return {
+            "app": "Crop Care (কৃষি বন্ধু)",
+            "version": "1.0.0",
+            "description": "NASA Space Apps Challenge 2026 - Production Ready Bangladeshi Farmer Application",
+            "status": "online",
+            "docs_url": "/docs"
+        }
 
 if __name__ == "__main__":
     import uvicorn
