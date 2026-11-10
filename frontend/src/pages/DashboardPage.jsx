@@ -147,40 +147,90 @@ export const DashboardPage = ({ setActiveTab }) => {
           
           {/* KPI 1: Spray Condition */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${sprayAdvisor?.can_spray ? 'bg-emerald-500/30 text-emerald-300' : 'bg-rose-500/30 text-rose-300'}`}>
+            <div className={`p-2 rounded-xl ${
+              sprayAdvisor?.status === 'hold'
+                ? 'bg-rose-500/30 text-rose-300'
+                : sprayAdvisor?.status === 'caution'
+                ? 'bg-amber-500/30 text-amber-300'
+                : 'bg-emerald-500/30 text-emerald-300'
+            }`}>
               <Sun className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-300 font-medium">আজকের স্প্রে পরামর্শ</div>
-              <div className="text-sm font-bold text-white flex items-center gap-1">
-                <span className={`w-2 h-2 rounded-full ${sprayAdvisor?.can_spray ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
-                {sprayAdvisor?.can_spray ? 'স্প্রে করার অনুকূল দিন' : 'আজ স্প্রে স্থগিত রাখুন'}
+              <div className="text-[11px] text-slate-300 font-medium">
+                {lang === 'bn' ? 'আজকের স্প্রে পরামর্শ' : "Today's Spray Advice"}
+              </div>
+              <div className="text-sm font-bold text-white flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${
+                  sprayAdvisor?.status === 'hold'
+                    ? 'bg-rose-400'
+                    : sprayAdvisor?.status === 'caution'
+                    ? 'bg-amber-400'
+                    : 'bg-emerald-400'
+                }`}></span>
+                <span>
+                  {lang === 'bn'
+                    ? (sprayAdvisor?.badge_bn || (sprayAdvisor?.status === 'hold' ? 'আজ স্প্রে স্থগিত রাখুন' : sprayAdvisor?.status === 'caution' ? 'সতর্কতার সাথে স্প্রে করুন' : 'স্প্রে করার অনুকূল দিন'))
+                    : (sprayAdvisor?.badge_en || (sprayAdvisor?.status === 'hold' ? 'Hold Spray Today' : sprayAdvisor?.status === 'caution' ? 'Spray with Caution' : 'Optimal Day to Spray'))}
+                </span>
               </div>
             </div>
           </div>
 
           {/* KPI 2: Irrigation Need */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-sky-500/30 text-sky-300">
+            <div className={`p-2 rounded-xl ${
+              irrigationSummary?.status === 'hold' 
+                ? 'bg-emerald-500/30 text-emerald-300' 
+                : 'bg-sky-500/30 text-sky-300'
+            }`}>
               <Droplets className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-300 font-medium">মাটির আর্দ্রতা ও সেচ</div>
-              <div className="text-sm font-bold text-white">
-                {irrigationSummary?.status === 'hold' ? 'সেচ বন্ধ রাখুন (পানি পর্যাপ্ত)' : 'হালকা সেচ প্রদান করুন'}
+              <div className="text-[11px] text-slate-300 font-medium">
+                {lang === 'bn' ? 'মাটির আর্দ্রতা ও সেচ' : 'Soil Moisture & Irrigation'}
+              </div>
+              <div className="text-sm font-bold text-white flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${
+                  irrigationSummary?.status === 'hold' ? 'bg-emerald-400' : 'bg-sky-400 animate-pulse'
+                }`}></span>
+                <span>
+                  {lang === 'bn'
+                    ? (irrigationSummary?.action_badge || (irrigationSummary?.status === 'hold' ? 'সেচ বন্ধ রাখুন (পানি পর্যাপ্ত)' : 'হালকা সেচ প্রদান করুন'))
+                    : (irrigationSummary?.action_badge_en || (irrigationSummary?.status === 'hold' ? 'Hold Irrigation' : 'Light Irrigation Needed'))}
+                </span>
               </div>
             </div>
           </div>
 
           {/* KPI 3: Plant Fever (ECOSTRESS) */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${thermalSummary?.stress_status === 'healthy' ? 'bg-emerald-500/30 text-emerald-300' : 'bg-amber-500/30 text-amber-300'}`}>
+            <div className={`p-2 rounded-xl ${
+              thermalSummary?.stress_status === 'critical_fever'
+                ? 'bg-rose-500/30 text-rose-300'
+                : thermalSummary?.stress_status === 'mild_thirst'
+                ? 'bg-amber-500/30 text-amber-300'
+                : 'bg-emerald-500/30 text-emerald-300'
+            }`}>
               <Thermometer className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-300 font-medium">গাছের জ্বর (ECOSTRESS)</div>
-              <div className="text-sm font-bold text-white">
-                {thermalSummary?.stress_level_bn || 'গাছ সুস্থ ও সতেজ'}
+              <div className="text-[11px] text-slate-300 font-medium">
+                {lang === 'bn' ? 'গাছের জ্বর (ECOSTRESS)' : 'Plant Fever (ECOSTRESS)'}
+              </div>
+              <div className="text-sm font-bold text-white flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${
+                  thermalSummary?.stress_status === 'critical_fever'
+                    ? 'bg-rose-400 animate-ping'
+                    : thermalSummary?.stress_status === 'mild_thirst'
+                    ? 'bg-amber-400'
+                    : 'bg-emerald-400'
+                }`}></span>
+                <span>
+                  {lang === 'bn'
+                    ? (thermalSummary?.stress_level_bn || 'গাছ সুস্থ ও সতেজ')
+                    : (thermalSummary?.stress_status === 'healthy' ? 'Healthy Canopy' : thermalSummary?.stress_status === 'mild_thirst' ? 'Mild Thirst' : 'Thermal Fever')}
+                </span>
               </div>
             </div>
           </div>

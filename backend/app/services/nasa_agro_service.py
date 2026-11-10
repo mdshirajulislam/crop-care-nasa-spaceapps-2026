@@ -115,30 +115,69 @@ class NasaAgroService:
 
         source_label = "NASA POWER & SMAP Live Soil Wetness (GWETTOP)" if nasa_data["is_live_nasa"] else "NASA POWER Climatology Baseline"
 
-        if not needs_irrigation:
+        # Check upcoming rain forecast to avoid recommending irrigation when rain is expected
+        upcoming_rain_mm = 0.0
+        try:
+            from app.services.weather_service import WeatherService
+            w_fc = await WeatherService.get_forecast(lat, lon)
+            if w_fc and "forecast" in w_fc and len(w_fc["forecast"]) > 0:
+                today_fc = w_fc["forecast"][0]
+                tomorrow_fc = w_fc["forecast"][1] if len(w_fc["forecast"]) > 1 else {}
+                upcoming_rain_mm = today_fc.get("precip_mm", 0.0) + (tomorrow_fc.get("precip_mm", 0.0) * 0.5)
+        except Exception as e:
+            logger.warning(f"Irrigation weather check fallback: {e}")
+
+        if upcoming_rain_mm >= 1.5:
+            status = "hold"
+            action_badge = "সেচ বন্ধ রাখুন (বৃষ্টির সম্ভাবনা)"
+            action_badge_en = "Hold Irrigation (Rain Expected)"
+            fallback_liters = round(3.5 * float(land_bigha) * 1.2, 1)
+            fallback_money = round(fallback_liters * 110)
+            diesel_liters_saved = diesel_liters_saved or fallback_liters
+            money_saved_bdt = money_saved_bdt or fallback_money
+            recommendation_bn = (
+                f"নাসার লাইভ আবহাওয়া পূর্বাভাস অনুযায়ী আগামী ২৪ ঘণ্টায় আপনার এলাকায় বৃষ্টির সম্ভাবনা রয়েছে ({round(upcoming_rain_mm, 1)} মিমি)। "
+                f"তাই কৃত্রিম সেচ পাম্প চালানো বন্ধ রাখুন এবং প্রাকৃতিক বৃষ্টির পানিকে কাজে লাগান। "
+                f"এতে আপনার {land_bigha} বিঘা জমিতে আনুমানিক {diesel_liters_saved} লিটার ডিজেল বা ৳{money_saved_bdt} সাশ্রয় হবে।"
+            )
+            recommendation_en = (
+                f"Rainfall forecast within 24-48 hours ({round(upcoming_rain_mm, 1)} mm). "
+                f"Hold pump irrigation to utilize natural rain, saving fuel costs."
+            )
+        elif not needs_irrigation:
             status = "hold"
             action_badge = "সেচ সাময়িক বন্ধ রাখুন (পানি পর্যাপ্ত)"
+            action_badge_en = "Hold Irrigation (Adequate Moisture)"
             recommendation_bn = (
                 f"নাসার লাইভ স্যাটেলাইট আর্দ্রতা সূচক অনুযায়ী আপনার মাটির ভেজাভাব বর্তমানে {current_moisture_pct}% (পর্যাপ্ত)। "
                 f"আগামী {next_dry_window_days} দিন কোনো সেচ পাম্প চালানোর প্রয়োজন নেই। "
                 f"এতে আপনার {land_bigha} বিঘা জমিতে আনুমানিক {diesel_liters_saved} লিটার ডিজেল বা ৳{money_saved_bdt} সাশ্রয় হবে।"
             )
+            recommendation_en = (
+                f"Soil moisture at {current_moisture_pct}% is adequate. Hold pump irrigation for next {next_dry_window_days} days to save fuel."
+            )
         else:
             status = "irrigate"
             action_badge = "হালকা সেচ প্রদান করুন"
+            action_badge_en = "Light Irrigation Needed"
             recommendation_bn = (
-                f"নাসার স্যাটেলাইট সূচক অনুযায়ী মাটির আর্দ্রতা {current_moisture_pct}%-এ নেমে এসেছে। "
+                f"নাসার স্যাটেলাইট সূচক অনুযায়ী মাটির আর্দ্রতা {current_moisture_pct}%-এ নেমে এসেছে এবং বৃষ্টির সম্ভাবনা নেই। "
                 f"কুশির সতেজতা ও বৃদ্ধির জন্য জমিতে ২ ইঞ্চি নিয়ন্ত্রিত সেচ প্রদান করুন।"
+            )
+            recommendation_en = (
+                f"Soil moisture dropped to {current_moisture_pct}% with no rain forecast. Apply controlled light irrigation."
             )
 
         return {
             "status": status,
             "action_badge": action_badge,
+            "action_badge_en": action_badge_en,
             "soil_moisture_pct": current_moisture_pct,
             "moisture_status_bn": "পর্যাপ্ত ভেজা অবস্থা (Moist)" if current_moisture_pct >= 60 else "শুষ্ক অবস্থা (Dry)",
             "satellite_source": source_label,
             "is_live_nasa": nasa_data["is_live_nasa"],
             "recommendation_bn": recommendation_bn,
+            "recommendation_en": recommendation_en,
             "next_irrigation_date": (datetime.now() + timedelta(days=next_dry_window_days)).strftime("%d %b %Y"),
             "savings": {
                 "diesel_liters": diesel_liters_saved,

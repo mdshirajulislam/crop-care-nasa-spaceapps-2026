@@ -9,7 +9,7 @@ export const TopAlertBanner = ({ sprayAdvisor, weatherRisk, farmerProfile, onNav
 
   const isHold = sprayAdvisor?.status === 'hold';
   const isCaution = sprayAdvisor?.status === 'caution';
-  const isSafe = sprayAdvisor?.status === 'safe';
+  const isSafe = sprayAdvisor?.status === 'safe' || (!isHold && !isCaution);
 
   // Construct precise location label from saved farmer profile
   const locationParts = [
@@ -33,12 +33,12 @@ export const TopAlertBanner = ({ sprayAdvisor, weatherRisk, farmerProfile, onNav
     : (sprayAdvisor?.lat && sprayAdvisor?.lon ? `${sprayAdvisor.lat.toFixed(4)}° N, ${sprayAdvisor.lon.toFixed(4)}° E` : '');
 
   const title = lang === 'bn' 
-    ? (sprayAdvisor?.title_bn || "কীটনাশক ও সার প্রয়োগের অনুকূল সময়")
+    ? (sprayAdvisor?.title_bn || (isHold ? "কীটনাশক ও সার স্প্রে সাময়িক স্থগিত রাখুন" : isCaution ? "সতর্কতার সাথে স্প্রে করুন" : "কীটনাশক ও সার প্রয়োগের অনুকূল সময়"))
     : (sprayAdvisor?.title_en || (isHold ? "Postpone Pesticide / Fertilizer Spraying" : isCaution ? "Caution: High Wind or Moderate Rain" : "Safe Window for Spray & Fertilizer"));
 
   // Keep description paragraph clean and focused on agricultural advisory without repeating address
   const cleanDetail = (lang === 'bn'
-    ? (sprayAdvisor?.detail_bn || "আজ সারাদিন আকাশ অনুকূল থাকবে এবং বৃষ্টির কোনো সম্ভাবনা নেই। বিকালের শান্ত রোদে স্প্রে করা সবচেয়ে নিরাপদ ও কার্যকর।")
+    ? (sprayAdvisor?.detail_bn || (isHold ? "আজ বৃষ্টির সম্ভাবনা রয়েছে। জমিতে কীটনাশক বা সার প্রয়োগ সাময়িক বন্ধ রাখুন যাতে ওষুধ ধুয়ে নষ্ট না হয়।" : isCaution ? "আবহাওয়া বা বাতাসের তারতম্যের কারণে সতর্কতার সাথে স্প্রে সম্পন্ন করুন।" : "আজ সারাদিন আকাশ অনুকূল থাকবে এবং বৃষ্টির কোনো সম্ভাবনা নেই। বিকালের শান্ত রোদে স্প্রে করা সবচেয়ে নিরাপদ ও কার্যকর।"))
     : (sprayAdvisor?.detail_en || (isHold ? "Heavy rain or strong wind forecast within 24 hours. Wait for dry weather." : isCaution ? "Scattered light showers expected. Avoid morning spraying." : "Optimal weather conditions. Good window for field application.")))
     .replace(/^.*?\s*(এলাকায়|এলাকায়|In\s+[^,]+,\s*)\s*/i, '');
 

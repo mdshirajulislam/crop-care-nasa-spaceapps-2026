@@ -107,9 +107,14 @@ class WeatherService:
                     # Unified pesticide spray recommendation based on current & upcoming forecast for farmer's location
                     today_rain = forecast_days[0]["precip_mm"] if forecast_days else 0
                     today_wind = forecast_days[0]["wind_kmh"] if forecast_days else 0
+                    today_prob = forecast_days[0]["precip_prob"] if forecast_days else 0
+                    tomorrow_rain = forecast_days[1]["precip_mm"] if len(forecast_days) > 1 else 0
+                    tomorrow_prob = forecast_days[1]["precip_prob"] if len(forecast_days) > 1 else 0
 
-                    if today_rain > 1.0 or (forecast_days and forecast_days[0]["precip_prob"] > 40):
+                    if today_rain > 1.0 or today_prob > 40:
                         spray_status = "hold"
+                        spray_badge_bn = "আজ স্প্রে স্থগিত রাখুন"
+                        spray_badge_en = "Hold Spray Today"
                         spray_title_bn = "কীটনাশক ও সার স্প্রে সাময়িক স্থগিত রাখুন"
                         spray_title_en = "Postpone Pesticide & Fertilizer Spraying"
                         # Find next safe dry day
@@ -120,16 +125,28 @@ class WeatherService:
                                 safe_day_name = fd["day_name_full_bn"]
                                 safe_day_name_en = fd["day_name_en"]
                                 break
-                        spray_detail_bn = f"আজ ও আগামী ২৪ ঘণ্টায় বৃষ্টির সম্ভাবনা রয়েছে ({today_rain} মিমি)। {safe_day_name} পর্যন্ত জমিতে কীটনাশক বা সার প্রয়োগ বন্ধ রাখুন যাতে ওষুধ ধুয়ে অপচয় না হয়।"
-                        spray_detail_en = f"Rain is expected within 24 hours ({today_rain} mm). Hold spraying until {safe_day_name_en} to prevent chemical wash-off."
+                        spray_detail_bn = f"আজ ও আগামী ২৪ ঘণ্টায় বৃষ্টির সম্ভাবনা রয়েছে ({today_rain} মিমি, বৃষ্টির সম্ভাবনা {today_prob}%)। {safe_day_name} পর্যন্ত জমিতে কীটনাশক বা সার প্রয়োগ বন্ধ রাখুন যাতে ওষুধ ধুয়ে অপচয় না হয়।"
+                        spray_detail_en = f"Rain is expected within 24 hours ({today_rain} mm, {today_prob}% chance). Hold spraying until {safe_day_name_en} to prevent chemical wash-off."
+                    elif tomorrow_rain > 5.0 and tomorrow_prob > 50:
+                        spray_status = "caution"
+                        spray_badge_bn = "সতর্কতার সাথে স্প্রে করুন"
+                        spray_badge_en = "Spray with Caution"
+                        spray_title_bn = "আগামীকাল বৃষ্টির সম্ভাবনা - আজ সতর্ক থাকুন"
+                        spray_title_en = "Rain Expected Tomorrow - Spray with Caution"
+                        spray_detail_bn = f"আজ আকাশ অনুকূল থাকলেও আগামীকাল মাঝারি বৃষ্টির পূর্বাভাস রয়েছে ({tomorrow_rain} মিমি)। জরুরি না হলে স্প্রে পিছিয়ে দিন অথবা ওষুধে স্টিকার/আঠা ব্যবহার করুন।"
+                        spray_detail_en = f"Clear today, but rain expected tomorrow ({tomorrow_rain} mm). Delay spraying if possible or use spray adjuvant."
                     elif today_wind > 15.0:
                         spray_status = "caution"
+                        spray_badge_bn = "সতর্কতার সাথে স্প্রে করুন"
+                        spray_badge_en = "Spray with Caution"
                         spray_title_bn = "বাতাসের গতি বেশি - সতর্কতার সাথে স্প্রে করুন"
                         spray_title_en = "High Wind - Caution During Field Spraying"
                         spray_detail_bn = f"বাতাসের গতিবেগ বেশি ({today_wind} কিমি/ঘণ্টা)। অতিরিক্ত বাতাসে স্প্রে করলে ওষুধের ফোঁটা উড়ে যেতে পারে এবং কার্যকারিতা কমতে পারে।"
                         spray_detail_en = f"Wind speed is high ({today_wind} km/h). Spraying may drift; proceed with caution or wait for calm air."
                     else:
                         spray_status = "safe"
+                        spray_badge_bn = "স্প্রে করার অনুকূল দিন"
+                        spray_badge_en = "Optimal Day to Spray"
                         spray_title_bn = "কীটনাশক ও সার প্রয়োগের অনুকূল সময়"
                         spray_title_en = "Safe Window for Spray & Fertilizer"
                         spray_detail_bn = f"আজ সারাদিন আকাশ অনুকূল থাকবে এবং বৃষ্টির কোনো সম্ভাবনা নেই ({today_rain} মিমি)। বিকালের শান্ত রোদে স্প্রে করা সবচেয়ে নিরাপদ ও কার্যকর।"
@@ -149,6 +166,9 @@ class WeatherService:
                         "forecast": forecast_days,
                         "pesticide_spray_advisor": {
                             "status": spray_status,
+                            "can_spray": spray_status != "hold",
+                            "badge_bn": spray_badge_bn,
+                            "badge_en": spray_badge_en,
                             "title_bn": spray_title_bn,
                             "title_en": spray_title_en,
                             "detail_bn": spray_detail_bn,
@@ -157,7 +177,8 @@ class WeatherService:
                             "lat": round(lat, 5),
                             "lon": round(lon, 5),
                             "rain_today_mm": today_rain,
-                            "wind_today_kmh": today_wind
+                            "wind_today_kmh": today_wind,
+                            "precip_prob_today": today_prob
                         }
                     }
         except Exception as e:
@@ -192,6 +213,9 @@ class WeatherService:
             "forecast": fallback_days,
             "pesticide_spray_advisor": {
                 "status": "safe",
+                "can_spray": True,
+                "badge_bn": "স্প্রে করার অনুকূল দিন",
+                "badge_en": "Optimal Day to Spray",
                 "title_bn": "কীটনাশক ও সার প্রয়োগের অনুকূল সময়",
                 "title_en": "Safe Window for Spray & Fertilizer",
                 "detail_bn": "আজকের আবহাওয়া শুষ্ক এবং বৃষ্টির ঝুঁকি কম। বিকালের রোদে স্প্রে করা সবচেয়ে উপযুক্ত।",
@@ -200,7 +224,8 @@ class WeatherService:
                 "lat": round(lat, 5),
                 "lon": round(lon, 5),
                 "rain_today_mm": 0.0,
-                "wind_today_kmh": 8.0
+                "wind_today_kmh": 8.0,
+                "precip_prob_today": 15
             }
         }
 
