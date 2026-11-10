@@ -1,13 +1,22 @@
 # 🌾 Crop Care (কৃষি বন্ধু) — NASA Agro-Intelligence PWA
 
 [![NASA Space Apps Challenge 2026](https://img.shields.io/badge/NASA_Space_Apps-2026-blue.svg?style=for-the-badge&logo=nasa)](https://www.spaceappschallenge.org/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Render_Cloud-success.svg?style=for-the-badge&logo=render)](https://crop-care-nasa-spaceapps-2026.onrender.com)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React 18](https://img.shields.io/badge/Frontend-React_18-61DAFB.svg?style=for-the-badge&logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Bundler-Vite-646CFF.svg?style=for-the-badge&logo=vite)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind_CSS-38B2AC.svg?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Keep-Alive 24/7](https://img.shields.io/badge/Keep--Alive-GitHub_Actions_24%2F7-2088FF.svg?style=for-the-badge&logo=github-actions)](https://github.com/mdshirajulislam/crop-care-nasa-spaceapps-2026/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 > **Empowering smallholder farmers across Bangladesh with NASA Earth Observation Satellite Data, Climatology Models, Real-Time Agro-Meteorology, and AI-Driven Crop Diagnosis.**
+
+---
+
+### 🌐 Live Production Application
+- **Live Cloud Web App**: [https://crop-care-nasa-spaceapps-2026.onrender.com](https://crop-care-nasa-spaceapps-2026.onrender.com)
+- **Interactive Swagger API Docs**: [https://crop-care-nasa-spaceapps-2026.onrender.com/docs](https://crop-care-nasa-spaceapps-2026.onrender.com/docs)
+- **Alternative ReDoc**: [https://crop-care-nasa-spaceapps-2026.onrender.com/redoc](https://crop-care-nasa-spaceapps-2026.onrender.com/redoc)
 
 ---
 
@@ -142,7 +151,17 @@ Crop Care directly taps into NASA Earth Data APIs and remote sensing products:
 - Prioritizes **eco-friendly & biological treatments** before chemical pesticides.
 - Displays chemical generic formulations, proper dosages, Pre-Harvest Intervals (PHI), and cost calculations per Bigha.
 
-### 9. 📜 Parametric Climate Loss Certificate
+### 9. 🔐 Dual-Mode Authentication & Security
+- Secure Email and Password registration and login with SHA-256 password hashing.
+- Seamless account onboarding for farmers, auto-syncing district and farm plot coordinates.
+- Test OTP authentication mode (`1234`) for offline field demonstrations.
+
+### 10. ⚡ 24/7 Zero-Downtime Cloud Keep-Alive Infrastructure
+- Automated scheduled GitHub Actions cron workflow running every 10 minutes to prevent Render free instances from sleeping.
+- Asynchronous self-ping background worker maintaining active HTTP ingress.
+- Full Single-Origin deployment: FastAPI directly serves the production React 18 PWA bundle with client-side SPA routing and zero CORS friction.
+
+### 11. 📜 Parametric Climate Loss Certificate
 - Instant generation of tamper-evident loss proof for bank loans and crop insurance.
 - Correlates reported field damage with NASA historical precipitation, heat index, and storm anomalies.
 
@@ -342,15 +361,20 @@ NASA SPACE APP CHALLENGE 2026/
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/v1/weather/current` | Current weather with NASA spray risk indices |
+| `POST` | `/api/v1/auth/register` | Farmer account registration (Email, password, name) |
+| `POST` | `/api/v1/auth/login` | Secure farmer login with JWT session token |
+| `GET` | `/api/v1/auth/profile` | Current farmer profile, district, and coordinates |
+| `GET` | `/api/v1/weather/forecast` | 7-day weather forecast with NASA spray risk indices |
 | `GET` | `/api/v1/planting/advisor` | NASA POWER 20-year climatology planting recommendations |
+| `GET` | `/api/v1/nasa-features/thermal-stress` | NASA ECOSTRESS plant canopy thermal stress & thirst index |
 | `GET` | `/api/v1/nasa-features/irrigation-advisor` | NASA SMAP soil moisture & diesel-saving pump schedule |
-| `GET` | `/api/v1/nasa-features/flash-flood-warning` | NASA GPM / IMERG 7-day upstream flood alert |
+| `GET` | `/api/v1/nasa-features/flash-flood-warning` | NASA GPM / IMERG 7-day upstream flood alert & emergency harvest |
 | `POST` | `/api/v1/nasa-features/insurance-certificate` | Automated climate disaster certificate generation |
 | `GET` | `/api/v1/nasa-features/community-pest-radar` | Crowdsourced local pest and outbreak radar |
 | `POST` | `/api/v1/disease/diagnose` | AI leaf image diagnosis with PHI & treatment |
 | `GET` | `/api/v1/plots/` | User farm plots with geospatial boundaries |
 | `GET` | `/api/v1/diary/summary` | Farm expense logging and ROI break-even analysis |
+| `POST` | `/api/v1/chat/ask` | AI Agro chatbot advisory with voice synthesis |
 
 ---
 
