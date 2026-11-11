@@ -83,6 +83,13 @@ By turning raw satellite observations (precipitation, soil moisture, solar irrad
   </tr>
 </table>
 
+<br/>
+
+<div align="center">
+  <h3>🛰️ Interactive Satellite Field Health & NASA GIBS NDVI Vegetation Index</h3>
+  <img src="screenshots/satellite-ndvi-map.png" alt="Interactive Satellite NDVI Field Health" width="95%" />
+</div>
+
 ---
 
 ## ⚠️ The Problem & Impact
